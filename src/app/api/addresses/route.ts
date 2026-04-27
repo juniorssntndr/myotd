@@ -18,7 +18,7 @@ export async function GET() {
       orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
     })
 
-    const transformedAddresses = addresses.map((address) => ({
+    const transformedAddresses = addresses.map((address: typeof addresses[number]) => ({
       id: address.id,
       label: address.label,
       name: address.name,

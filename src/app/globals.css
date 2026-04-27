@@ -79,6 +79,11 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --myotd-red: oklch(0.588 0.245 27.325);
+  --myotd-red-foreground: oklch(0.985 0 0);
+  --myotd-red-soft: oklch(0.97 0.03 28);
+  --myotd-red-border: oklch(0.87 0.08 28);
+  --myotd-red-muted: oklch(0.72 0.11 28);
 }
 
 .dark {
@@ -121,5 +126,73 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes brand-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .brand-marquee-track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    gap: 1rem;
+    animation: brand-marquee 28s linear infinite;
+    will-change: transform;
+  }
+
+  .brand-marquee-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklch, var(--border) 85%, white 15%);
+    background: color-mix(in oklch, var(--background) 92%, white 8%);
+    padding: 0.9rem 1.2rem;
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .brand-marquee-item:hover {
+    transform: translateY(-1px);
+    border-color: var(--myotd-red-border);
+    background: color-mix(in oklch, var(--myotd-red-soft) 55%, white 45%);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .brand-marquee-logo {
+    filter: grayscale(1) brightness(0.08);
+    opacity: 0.82;
+    transition:
+      transform 180ms ease,
+      opacity 180ms ease,
+      filter 180ms ease;
+  }
+
+  .brand-marquee-item:hover .brand-marquee-logo {
+    transform: scale(1.08);
+    opacity: 1;
+    filter: grayscale(1) brightness(0.02);
+  }
+
+  .brand-marquee-item:hover .brand-marquee-fallback {
+    transform: scale(1.05);
+    color: color-mix(in oklch, var(--foreground) 94%, var(--myotd-red) 6%);
+  }
+
+  .brand-marquee-fallback {
+    transition:
+      transform 180ms ease,
+      color 180ms ease;
   }
 }

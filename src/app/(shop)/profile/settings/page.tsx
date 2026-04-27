@@ -29,7 +29,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Configuracion</h2>
+        <h2 className="text-xl font-semibold">Configuración</h2>
         <p className="text-muted-foreground">
           Administra las preferencias de tu cuenta
         </p>
@@ -103,7 +103,7 @@ export default function SettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="es">Espanol</SelectItem>
+                  <SelectItem value="es">Español</SelectItem>
                   <SelectItem value="en">English</SelectItem>
                 </SelectContent>
               </Select>
@@ -135,9 +135,9 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Historial de busqueda</p>
+              <p className="font-medium">Historial de búsqueda</p>
               <p className="text-sm text-muted-foreground">
-                Guardar historial de busquedas para mejorar recomendaciones
+                Guardar historial de búsquedas para mejorar recomendaciones
               </p>
             </div>
             <Switch defaultChecked />
@@ -145,7 +145,7 @@ export default function SettingsPage() {
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Perfil publico</p>
+              <p className="font-medium">Perfil público</p>
               <p className="text-sm text-muted-foreground">
                 Permitir que otros usuarios vean tu perfil
               </p>
@@ -190,9 +190,9 @@ export default function SettingsPage() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Estas seguro?</AlertDialogTitle>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta accion no se puede deshacer. Se eliminara permanentemente tu
+                    Esta acción no se puede deshacer. Se eliminará permanentemente tu
                     cuenta y todos los datos asociados.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

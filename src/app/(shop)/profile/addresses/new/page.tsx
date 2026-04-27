@@ -24,11 +24,11 @@ import { useUserStore } from "@/stores/user-store"
 const addressSchema = z.object({
   label: z.string().min(1, "La etiqueta es requerida"),
   name: z.string().min(1, "El nombre es requerido"),
-  phone: z.string().min(1, "El telefono es requerido"),
-  address: z.string().min(1, "La direccion es requerida"),
+  phone: z.string().min(1, "El teléfono es requerido"),
+  address: z.string().min(1, "La dirección es requerida"),
   city: z.string().min(1, "La ciudad es requerida"),
   state: z.string().min(1, "El departamento es requerido"),
-  zipCode: z.string().min(1, "El codigo postal es requerido"),
+  zipCode: z.string().min(1, "El código postal es requerido"),
   isDefault: z.boolean(),
 })
 
@@ -81,18 +81,18 @@ export default function NewAddressPage() {
           </Link>
         </Button>
         <div>
-          <h2 className="text-xl font-semibold">Nueva Direccion</h2>
+          <h2 className="text-xl font-semibold">Nueva Dirección</h2>
           <p className="text-muted-foreground">
-            Agrega una nueva direccion de envio
+            Agrega una nueva dirección de envío
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Informacion de la Direccion</CardTitle>
+          <CardTitle>Información de la Dirección</CardTitle>
           <CardDescription>
-            Completa los datos de tu nueva direccion
+            Completa los datos de tu nueva dirección
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -123,7 +123,7 @@ export default function NewAddressPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono</Label>
+              <Label htmlFor="phone">Teléfono</Label>
               <Input
                 id="phone"
                 placeholder="+51 999 888 777"
@@ -135,7 +135,7 @@ export default function NewAddressPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Direccion</Label>
+              <Label htmlFor="address">Dirección</Label>
               <Input
                 id="address"
                 placeholder="Av. Principal 123"
@@ -177,7 +177,7 @@ export default function NewAddressPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="zipCode">Codigo Postal</Label>
+                <Label htmlFor="zipCode">Código Postal</Label>
                 <Input
                   id="zipCode"
                   placeholder="15001"
@@ -196,7 +196,7 @@ export default function NewAddressPage() {
                 onCheckedChange={(checked) => setValue("isDefault", !!checked)}
               />
               <Label htmlFor="isDefault" className="font-normal">
-                Establecer como direccion predeterminada
+                Establecer como dirección predeterminada
               </Label>
             </div>
 
@@ -211,7 +211,7 @@ export default function NewAddressPage() {
                     Guardando...
                   </>
                 ) : (
-                  "Guardar Direccion"
+                  "Guardar Dirección"
                 )}
               </Button>
             </div>

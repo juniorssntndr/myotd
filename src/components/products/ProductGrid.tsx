@@ -4,6 +4,7 @@ import { LayoutGrid, List } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductCard } from "./ProductCard"
+import { ProductListItem } from "./ProductListItem"
 import { Product } from "@/types"
 
 interface ProductGridProps {
@@ -66,7 +67,7 @@ export function ProductGrid({
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <p className="text-lg font-medium">No se encontraron productos</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Intenta ajustar los filtros de busqueda
+            Intenta ajustar los filtros de búsqueda
           </p>
         </div>
       ) : (
@@ -78,7 +79,11 @@ export function ProductGrid({
           }
         >
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            viewMode === "list" ? (
+              <ProductListItem key={product.id} product={product} />
+            ) : (
+              <ProductCard key={product.id} product={product} />
+            )
           ))}
         </div>
       )}

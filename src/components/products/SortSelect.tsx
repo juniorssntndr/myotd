@@ -21,7 +21,7 @@ export function SortSelect({ value, onChange }: SortSelectProps) {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="popular">Popular</SelectItem>
-        <SelectItem value="newest">Mas nuevos</SelectItem>
+        <SelectItem value="newest">Más nuevos</SelectItem>
         <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
         <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
         <SelectItem value="rating">Mejor valorados</SelectItem>

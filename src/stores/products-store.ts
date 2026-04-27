@@ -10,7 +10,6 @@ interface ProductsState {
   loading: boolean
   error: string | null
 
-  // Actions
   fetchProducts: (filters?: Partial<FilterState>) => Promise<void>
   fetchFeaturedProducts: () => Promise<void>
   fetchCategories: () => Promise<void>
@@ -22,6 +21,8 @@ interface ProductsState {
 const defaultFilters: FilterState = {
   categories: [],
   brands: [],
+  sizes: [],
+  colors: [],
   priceRange: [0, 10000],
   sortBy: "newest",
 }
@@ -46,6 +47,12 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       }
       if (filters.brands.length === 1) {
         params.set("brand", filters.brands[0])
+      }
+      if (filters.sizes.length > 0) {
+        params.set("size", filters.sizes[0])
+      }
+      if (filters.colors.length > 0) {
+        params.set("color", filters.colors[0])
       }
       if (filters.priceRange[0] > 0) {
         params.set("minPrice", filters.priceRange[0].toString())

@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown, ChevronUp, Search } from "lucide-react"
+import { useEffect, useState } from "react"
+import { ChevronDown, ChevronUp, Search, Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { brands } from "@/data/mock-products"
+import { useBrandsStore } from "@/stores/brands-store"
 
 interface BrandFilterProps {
   selectedBrands: string[]
@@ -15,16 +15,23 @@ interface BrandFilterProps {
 export function BrandFilter({ selectedBrands, onBrandsChange }: BrandFilterProps) {
   const [isOpen, setIsOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const { brands, loading, fetchBrands } = useBrandsStore()
+
+  useEffect(() => {
+    if (brands.length === 0) {
+      fetchBrands()
+    }
+  }, [brands.length, fetchBrands])
 
   const filteredBrands = brands.filter((brand) =>
     brand.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleBrandToggle = (brandName: string) => {
-    if (selectedBrands.includes(brandName)) {
-      onBrandsChange(selectedBrands.filter((b) => b !== brandName))
+  const handleBrandToggle = (brandSlug: string) => {
+    if (selectedBrands.includes(brandSlug)) {
+      onBrandsChange(selectedBrands.filter((b) => b !== brandSlug))
     } else {
-      onBrandsChange([...selectedBrands, brandName])
+      onBrandsChange([...selectedBrands, brandSlug])
     }
   }
 
@@ -55,26 +62,37 @@ export function BrandFilter({ selectedBrands, onBrandsChange }: BrandFilterProps
             />
           </div>
 
-          <div className="max-h-48 space-y-2 overflow-y-auto">
-            {filteredBrands.map((brand) => (
-              <div key={brand.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`brand-${brand.id}`}
-                  checked={selectedBrands.includes(brand.name)}
-                  onCheckedChange={() => handleBrandToggle(brand.name)}
-                />
-                <Label
-                  htmlFor={`brand-${brand.id}`}
-                  className="flex flex-1 cursor-pointer items-center justify-between text-sm"
-                >
-                  <span>{brand.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {brand.productCount}
-                  </span>
-                </Label>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="max-h-48 space-y-2 overflow-y-auto pr-2">
+              {filteredBrands.map((brand) => (
+                <div key={brand.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`brand-${brand.id}`}
+                    checked={selectedBrands.includes(brand.slug)}
+                    onCheckedChange={() => handleBrandToggle(brand.slug)}
+                  />
+                  <Label
+                    htmlFor={`brand-${brand.id}`}
+                    className="flex flex-1 cursor-pointer items-center justify-between text-sm"
+                  >
+                    <span>{brand.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {brand.productCount}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+              {filteredBrands.length === 0 && !loading && (
+                <p className="text-center text-xs text-muted-foreground py-2">
+                  No se encontraron marcas
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

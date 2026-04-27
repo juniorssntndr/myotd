@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/api-auth"
 
 export async function GET(request: NextRequest) {
   try {
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
     const limit = parseInt(searchParams.get("limit") || "50")
@@ -27,6 +33,9 @@ export async function GET(request: NextRequest) {
               product: {
                 select: { images: true },
               },
+              variant: {
+                select: { size: true, color: true, sku: true },
+              },
             },
           },
         },
@@ -37,7 +46,7 @@ export async function GET(request: NextRequest) {
       prisma.order.count({ where }),
     ])
 
-    const transformedOrders = orders.map((order) => ({
+    const transformedOrders = orders.map((order: typeof orders[number]) => ({
       id: order.id,
       orderNumber: order.orderNumber,
       customer: {
@@ -56,14 +65,17 @@ export async function GET(request: NextRequest) {
         state: order.address.state,
         zipCode: order.address.zipCode,
       },
-      items: order.items.map((item) => ({
+      items: order.items.map((item: typeof order.items[number]) => ({
         name: item.name,
+        size: item.variant?.size || "",
+        color: item.variant?.color || "",
+        sku: item.variant?.sku || "",
         quantity: item.quantity,
         price: Number(item.price),
         total: Number(item.total),
         image: item.product.images[0] || "",
       })),
-      itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+      itemCount: order.items.reduce((sum: number, item: typeof order.items[number]) => sum + item.quantity, 0),
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
     }))

@@ -1,12 +1,22 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: basictech-db
+    container_name: myotd-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: basictech
-      POSTGRES_PASSWORD: basictech123
-      POSTGRES_DB: basictech_shop
+      POSTGRES_USER: myotd
+      POSTGRES_PASSWORD: myotd123
+      POSTGRES_DB: myotd
     ports:
       - "5490:5432"
+    volumes:
+      - myotd_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myotd -d myotd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  myotd_postgres_data:
 

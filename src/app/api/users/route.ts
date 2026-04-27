@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
+import { requireAdmin } from "@/lib/api-auth"
 
 export async function GET(request: NextRequest) {
   try {
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
     const { searchParams } = new URL(request.url)
     const role = searchParams.get("role")
     const status = searchParams.get("status")
@@ -39,7 +46,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     })
 
-    const transformedUsers = users.map((user) => ({
+    const transformedUsers = users.map((user: typeof users[number]) => ({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -48,7 +55,7 @@ export async function GET(request: NextRequest) {
       status: user.status.toLowerCase(),
       createdAt: user.createdAt.toISOString(),
       orders: user._count.orders,
-      totalSpent: user.orders.reduce((sum, order) => sum + Number(order.total), 0),
+      totalSpent: user.orders.reduce((sum: number, order: typeof user.orders[number]) => sum + Number(order.total), 0),
     }))
 
     return NextResponse.json(transformedUsers)
@@ -63,13 +70,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
 
-    // In a real app, you'd hash the password here
+    const body = await request.json()
+    const hashedPassword = await bcrypt.hash(body.password, 10)
+
     const user = await prisma.user.create({
       data: {
         email: body.email,
-        password: body.password, // Should be hashed
+        password: hashedPassword,
         name: body.name,
         phone: body.phone,
         role: body.role?.toUpperCase() || "CUSTOMER",

@@ -1,28 +1,35 @@
-import { NextRequest, NextResponse } from "next/server"
-import { stripe } from "@/lib/stripe"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { createCulqiPayment } from "@/lib/culqi"
+import { getShippingCost } from "@/lib/shipping"
+import type { CheckoutBody } from "@/types"
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image?: string
-}
+function validateCheckoutPayload(body: CheckoutBody): string | null {
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    return "No items in cart"
+  }
 
-interface CheckoutBody {
-  items: CartItem[]
-  customerEmail?: string
-  shippingAddressId?: string
-  metadata?: Record<string, string>
+  if (!body.shippingAddress || !body.paymentMethod) {
+    return "Missing shipping address or payment method"
+  }
+
+  const invalidItem = body.items.find(
+    (item) => !item.productId || !item.variantId || item.quantity <= 0
+  )
+
+  if (invalidItem) {
+    return "Invalid checkout items"
+  }
+
+  return null
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Debes iniciar sesión para realizar una compra" },
         { status: 401 }
@@ -30,124 +37,173 @@ export async function POST(request: NextRequest) {
     }
 
     const body: CheckoutBody = await request.json()
-    const { items, metadata } = body
+    const validationError = validateCheckoutPayload(body)
 
-    if (!items || items.length === 0) {
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 })
+    }
+
+    const { items, shippingAddress, paymentMethod, notes } = body
+
+    const variants = await prisma.productVariant.findMany({
+      where: {
+        id: { in: items.map((item) => item.variantId) },
+      },
+      include: {
+        product: {
+          include: {
+            brand: true,
+          },
+        },
+      },
+    })
+
+    const variantMap = new Map(variants.map((variant) => [variant.id, variant]))
+
+    const enrichedItems = items.map((item) => {
+      const variant = variantMap.get(item.variantId)
+      return { item, variant }
+    })
+
+    const invalidItems = enrichedItems.filter(({ item, variant }) => {
+      return !variant || variant.productId !== item.productId || !variant.product.isActive
+    })
+
+    if (invalidItems.length > 0) {
       return NextResponse.json(
-        { error: "No items in cart" },
+        { error: "Uno o más productos ya no están disponibles" },
         { status: 400 }
       )
     }
 
-    // Create line items for Stripe
-    const lineItems = items.map((item) => ({
-      price_data: {
-        currency: "pen", // Peruvian Sol
-        product_data: {
-          name: item.name,
-          images: item.image ? [item.image] : [],
+    const outOfStock = enrichedItems.filter(({ item, variant }) => {
+      return (variant?.stock || 0) < item.quantity
+    })
+
+    if (outOfStock.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Stock insuficiente",
+          details: outOfStock.map(({ item, variant }) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            name: variant?.product.name || item.name,
+            requested: item.quantity,
+            available: variant?.stock || 0,
+          })),
         },
-        unit_amount: Math.round(item.price * 100), // Stripe uses cents
-      },
-      quantity: item.quantity,
-    }))
+        { status: 400 }
+      )
+    }
 
-    // Calculate subtotal for free shipping check
-    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const qualifiesForFreeShipping = subtotal >= 200
+    const subtotal = enrichedItems.reduce(
+      (sum, { item, variant }) => sum + Number(variant?.product.price || 0) * item.quantity,
+      0
+    )
 
-    // Build shipping options based on subtotal
-    const shippingOptions = qualifiesForFreeShipping
-      ? [
-          {
-            shipping_rate_data: {
-              type: "fixed_amount" as const,
-              fixed_amount: {
-                amount: 0,
-                currency: "pen",
-              },
-              display_name: "Envio gratis",
-              delivery_estimate: {
-                minimum: { unit: "business_day" as const, value: 3 },
-                maximum: { unit: "business_day" as const, value: 5 },
-              },
-            },
-          },
-          {
-            shipping_rate_data: {
-              type: "fixed_amount" as const,
-              fixed_amount: {
-                amount: 1500, // S/ 15.00
-                currency: "pen",
-              },
-              display_name: "Envio express",
-              delivery_estimate: {
-                minimum: { unit: "business_day" as const, value: 1 },
-                maximum: { unit: "business_day" as const, value: 2 },
-              },
-            },
-          },
-        ]
-      : [
-          {
-            shipping_rate_data: {
-              type: "fixed_amount" as const,
-              fixed_amount: {
-                amount: 1500, // S/ 15.00
-                currency: "pen",
-              },
-              display_name: "Envio estandar",
-              delivery_estimate: {
-                minimum: { unit: "business_day" as const, value: 3 },
-                maximum: { unit: "business_day" as const, value: 5 },
-              },
-            },
-          },
-          {
-            shipping_rate_data: {
-              type: "fixed_amount" as const,
-              fixed_amount: {
-                amount: 3000, // S/ 30.00
-                currency: "pen",
-              },
-              display_name: "Envio express",
-              delivery_estimate: {
-                minimum: { unit: "business_day" as const, value: 1 },
-                maximum: { unit: "business_day" as const, value: 2 },
-              },
-            },
-          },
-        ]
+    const shippingCost = getShippingCost(shippingAddress.district, subtotal)
+    const total = subtotal + shippingCost
 
-    // Create Stripe checkout session
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
-      customer_email: session.user.email || undefined,
-      metadata: {
-        ...metadata,
-        userId: session.user.id,
-        items: JSON.stringify(items.map((i) => ({ id: i.id, qty: i.quantity }))),
-      },
-      shipping_options: shippingOptions,
-      billing_address_collection: "required",
-      shipping_address_collection: {
-        allowed_countries: ["PE"],
+    const orderCount = await prisma.order.count()
+    const orderNumber = `MYOTD-${new Date().getFullYear()}-${String(orderCount + 1).padStart(5, "0")}`
+
+    const created = await prisma.$transaction(async (tx) => {
+      const address = await tx.address.create({
+        data: {
+          userId: session.user.id,
+          label: "Envío",
+          name: shippingAddress.name,
+          phone: shippingAddress.phone,
+          address: shippingAddress.address,
+          city: shippingAddress.city,
+          state: shippingAddress.district,
+          zipCode: shippingAddress.zipCode,
+          isDefault: false,
+        },
+      })
+
+      const order = await tx.order.create({
+        data: {
+          orderNumber,
+          status: "PENDING",
+          subtotal,
+          shipping: shippingCost,
+          total,
+          paymentMethod,
+          notes,
+          userId: session.user.id,
+          addressId: address.id,
+          items: {
+            create: enrichedItems.map(({ item, variant }) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              name: variant?.product.name || item.name,
+              price: Number(variant?.product.price || item.price),
+              quantity: item.quantity,
+              total: Number(variant?.product.price || item.price) * item.quantity,
+            })),
+          },
+        },
+      })
+
+      return { address, order }
+    })
+
+    const description = enrichedItems
+      .map(({ item, variant }) => `${variant?.product.name || item.name} x${item.quantity}`)
+      .join(", ")
+
+    const culqiResult = await createCulqiPayment({
+      amount: total,
+      description: `Pedido ${orderNumber}: ${description}`,
+      orderNumber,
+      email: session.user.email || "",
+      shippingAddress: {
+        name: shippingAddress.name,
+        phone: shippingAddress.phone,
+        address: shippingAddress.address,
+        city: shippingAddress.city,
+        district: shippingAddress.district,
       },
     })
+
+    if (culqiResult.requiresManualConfirmation) {
+      await prisma.order.update({
+        where: { id: created.order.id },
+        data: {
+          notes: notes
+            ? `${notes}\nPago pendiente de confirmacion manual.`
+            : "Pago pendiente de confirmacion manual.",
+        },
+      })
+    }
+
+    if (!culqiResult.success || !culqiResult.checkoutUrl) {
+      await prisma.order.update({
+        where: { id: created.order.id },
+        data: { status: "CANCELLED" },
+      })
+
+      return NextResponse.json(
+        { error: culqiResult.error || "Error creating payment" },
+        { status: 500 }
+      )
+    }
+
+    if (culqiResult.payment?.id) {
+      await prisma.order.update({
+        where: { id: created.order.id },
+        data: { culqiPaymentId: culqiResult.payment.id },
+      })
+    }
 
     return NextResponse.json({
-      sessionId: stripeSession.id,
-      url: stripeSession.url
+      checkoutUrl: culqiResult.checkoutUrl,
+      orderId: created.order.id,
+      orderNumber: created.order.orderNumber,
     })
   } catch (error) {
-    console.error("Error creating checkout session:", error)
-    return NextResponse.json(
-      { error: "Error creating checkout session" },
-      { status: 500 }
-    )
+    console.error("Error creating checkout:", error)
+    return NextResponse.json({ error: "Error creating checkout" }, { status: 500 })
   }
 }

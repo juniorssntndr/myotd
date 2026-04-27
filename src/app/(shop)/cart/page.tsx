@@ -10,12 +10,12 @@ import { useCartStore } from "@/stores/cart-store"
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCartStore()
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
-    updateQuantity(productId, quantity)
+  const handleUpdateQuantity = (productId: string, variantId: string, quantity: number) => {
+    updateQuantity(productId, variantId, quantity)
   }
 
-  const handleRemove = (productId: string) => {
-    removeItem(productId)
+  const handleRemove = (productId: string, variantId: string) => {
+    removeItem(productId, variantId)
   }
 
   if (items.length === 0) {
@@ -25,9 +25,9 @@ export default function CartPage() {
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-muted">
             <ShoppingBag className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">Tu carrito esta vacio</h1>
+          <h1 className="text-2xl font-bold">Tu carrito está vacío</h1>
           <p className="mt-2 text-muted-foreground">
-            Parece que aun no has agregado productos a tu carrito.
+            Parece que aún no has agregado productos a tu carrito.
           </p>
           <Button asChild className="mt-6">
             <Link href="/products">Explorar Productos</Link>
@@ -39,7 +39,6 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Carrito de Compras</h1>
@@ -56,14 +55,13 @@ export default function CartPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="rounded-lg border bg-card">
             <div className="p-4 sm:p-6">
               <div className="divide-y">
                 {items.map((item) => (
                   <CartItem
-                    key={item.product.id}
+                    key={`${item.product.id}-${item.variantId}`}
                     item={item}
                     onUpdateQuantity={handleUpdateQuantity}
                     onRemove={handleRemove}
@@ -73,7 +71,6 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Continue Shopping - Mobile */}
           <Button variant="outline" asChild className="mt-4 w-full sm:hidden">
             <Link href="/products">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -82,7 +79,6 @@ export default function CartPage() {
           </Button>
         </div>
 
-        {/* Summary */}
         <div className="lg:col-span-1">
           <div className="sticky top-24">
             <CartSummary items={items} />

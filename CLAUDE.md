@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BasicTechShop is an e-commerce application for computer products built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and shadcn/ui. Currently in UI-only phase with mock data - backend integration (PostgreSQL/Prisma) planned for future.
+Myotd is a multi-brand urban fashion e-commerce application for Peru built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, and shadcn/ui. It currently uses mock/seeded data with PostgreSQL/Prisma integration in progress.
 
 ### Component Organization
 ```

@@ -5,9 +5,13 @@ import { Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ProductCard } from "@/components/products/ProductCard"
-import { favorites } from "@/data/mock-user"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useFavoritesStore } from "@/stores/favorites-store"
 
 export default function FavoritesPage() {
+  const favorites = useFavoritesStore((state) => state.favorites)
+  const hydrated = useFavoritesStore((state) => state.hydrated)
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,7 +21,17 @@ export default function FavoritesPage() {
         </p>
       </div>
 
-      {favorites.length === 0 ? (
+      {!hydrated ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="space-y-3">
+              <Skeleton className="aspect-square rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : favorites.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Heart className="h-12 w-12 text-muted-foreground mb-4" />

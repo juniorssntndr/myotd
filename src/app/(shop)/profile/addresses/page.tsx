@@ -84,7 +84,7 @@ export default function AddressesPage() {
           <div>
             <h2 className="text-xl font-semibold">Mis Direcciones</h2>
             <p className="text-muted-foreground">
-              Administra tus direcciones de envio
+              Administra tus direcciones de envío
             </p>
           </div>
         </div>
@@ -99,13 +99,13 @@ export default function AddressesPage() {
         <div>
           <h2 className="text-xl font-semibold">Mis Direcciones</h2>
           <p className="text-muted-foreground">
-            Administra tus direcciones de envio
+            Administra tus direcciones de envío
           </p>
         </div>
         <Button asChild>
           <Link href="/profile/addresses/new">
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Direccion
+            Nueva Dirección
           </Link>
         </Button>
       </div>
@@ -116,12 +116,12 @@ export default function AddressesPage() {
             <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="font-semibold">No tienes direcciones guardadas</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Agrega una direccion para facilitar tus compras
+              Agrega una dirección para facilitar tus compras
             </p>
             <Button asChild>
               <Link href="/profile/addresses/new">
                 <Plus className="mr-2 h-4 w-4" />
-                Agregar Direccion
+                Agregar Dirección
               </Link>
             </Button>
           </CardContent>
@@ -191,9 +191,9 @@ export default function AddressesPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar direccion</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar dirección</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion no se puede deshacer. La direccion sera eliminada permanentemente.
+              Esta acción no se puede deshacer. La dirección será eliminada permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

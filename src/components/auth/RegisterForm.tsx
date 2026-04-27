@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -161,7 +161,7 @@ export function RegisterForm() {
                 </FieldDescription>
               </Field>
               <Field>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,15 +183,7 @@ export function RegisterForm() {
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        Al continuar, aceptas nuestros{" "}
-        <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
-          Términos de Servicio
-        </Link>{" "}
-        y{" "}
-        <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
-          Política de Privacidad
-        </Link>
-        .
+        Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad.
       </FieldDescription>
     </div>
   )

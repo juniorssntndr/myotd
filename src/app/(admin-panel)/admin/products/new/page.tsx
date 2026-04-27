@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -21,20 +22,29 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ImageUpload } from "@/components/admin/ImageUpload"
+import { InlineCreateDialog, InlineCreateButton } from "@/components/admin/InlineCreateDialog"
+import { useCategoriesStore } from "@/stores/categories-store"
+import { useBrandsStore } from "@/stores/brands-store"
 
 interface UploadedImage {
   url: string
   publicId: string
 }
 
+interface ProductVariantInput {
+  id?: string
+  size: string
+  color: string
+  stock: number
+}
+
 const productSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   slug: z.string().min(1, "El slug es requerido"),
-  description: z.string().min(1, "La descripcion es requerida"),
+  description: z.string().min(1, "La descripción es requerida"),
   price: z.number().min(0, "El precio debe ser mayor a 0"),
   comparePrice: z.number().optional(),
-  stock: z.number().min(0, "El stock debe ser mayor o igual a 0"),
-  categoryId: z.string().min(1, "La categoria es requerida"),
+  categoryId: z.string().min(1, "La categoría es requerida"),
   brandId: z.string().min(1, "La marca es requerida"),
   isNew: z.boolean(),
   isFeatured: z.boolean(),
@@ -42,25 +52,30 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>
 
-interface Category {
-  id: string
-  name: string
-  slug: string
-}
-
-interface Brand {
-  id: string
-  name: string
-  slug: string
+const EMPTY_VARIANT: ProductVariantInput = {
+  size: "",
+  color: "",
+  stock: 0,
 }
 
 export default function NewProductPage() {
   const router = useRouter()
-  const [categories, setCategories] = useState<Category[]>([])
-  const [brands, setBrands] = useState<Brand[]>([])
+  const { categories, addCategory, fetchCategories, loading: categoriesLoading } = useCategoriesStore()
+  const { brands, addBrand, fetchBrands, loading: brandsLoading } = useBrandsStore()
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<UploadedImage[]>([])
+  const [variants, setVariants] = useState<ProductVariantInput[]>([{ ...EMPTY_VARIANT }])
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false)
+
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([fetchCategories(), fetchBrands()])
+      setLoading(false)
+    }
+    loadData()
+  }, [fetchCategories, fetchBrands])
 
   const {
     register,
@@ -73,32 +88,8 @@ export default function NewProductPage() {
     defaultValues: {
       isNew: false,
       isFeatured: false,
-      stock: 0,
     },
   })
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [categoriesRes, brandsRes] = await Promise.all([
-          fetch("/api/categories"),
-          fetch("/api/brands"),
-        ])
-
-        const categoriesData = await categoriesRes.json()
-        const brandsData = await brandsRes.json()
-
-        setCategories(categoriesData || [])
-        setBrands(brandsData || [])
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
 
   const generateSlug = (name: string) => {
     return name
@@ -109,43 +100,151 @@ export default function NewProductPage() {
       .replace(/(^-|-$)/g, "")
   }
 
+  const generateSku = (productName: string, size: string, color: string) => {
+    const prefix = productName
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 4)
+    const sizeCode = size.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const colorCode = color.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4)
+    return `${prefix}-${sizeCode}-${colorCode}`
+  }
+
+  const updateVariant = (index: number, field: keyof ProductVariantInput, value: string | number) => {
+    setVariants((previous) =>
+      previous.map((variant, variantIndex) =>
+        variantIndex === index ? { ...variant, [field]: value } : variant
+      )
+    )
+  }
+
+  const addVariant = () => {
+    setVariants((previous) => [...previous, { ...EMPTY_VARIANT }])
+  }
+
+  const removeVariant = (index: number) => {
+    setVariants((previous) => previous.filter((_, variantIndex) => variantIndex !== index))
+  }
+
+  const handleCreateCategory = async (name: string) => {
+    try {
+      const slug = generateSlug(name)
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, slug, icon: "" }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error creating category")
+      }
+
+      const newCategory = await response.json()
+      addCategory(newCategory)
+      setValue("categoryId", newCategory.id)
+    } catch (error) {
+      console.error("Error creating category:", error)
+      toast.error("No se pudo crear la categoría")
+      throw error
+    }
+  }
+
+  const handleCreateBrand = async (name: string) => {
+    try {
+      const slug = generateSlug(name)
+      const response = await fetch("/api/brands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, slug, logo: "" }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error creating brand")
+      }
+
+      const newBrand = await response.json()
+      addBrand(newBrand)
+      setValue("brandId", newBrand.id)
+    } catch (error) {
+      console.error("Error creating brand:", error)
+      toast.error("No se pudo crear la marca")
+      throw error
+    }
+  }
+
   const onSubmit = async (data: ProductFormData) => {
     if (images.length === 0) {
-      alert("Debes subir al menos una imagen")
+      toast.error("Debes subir al menos una imagen")
       return
     }
 
+    const incompleteVariants = variants.filter((v) => !v.size || !v.color)
+    if (incompleteVariants.length > 0) {
+      toast.error("Todas las variantes deben tener talla y color")
+      return
+    }
+
+    const validVariants = variants.filter(
+      (variant) => variant.size && variant.color && variant.stock >= 0
+    )
+
+    if (validVariants.length === 0) {
+      toast.error("Debes registrar al menos una variante válida")
+      return
+    }
+
+    const variantsWithSku = validVariants.map((v) => ({
+      ...v,
+      sku: generateSku(data.name, v.size, v.color),
+    }))
+
     setSaving(true)
+
     try {
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          images: images.map((img) => img.url),
+          images: images.map((image) => image.url),
+          variants: variantsWithSku,
+          isActive: true,
         }),
       })
 
-      if (!response.ok) throw new Error("Error creating product")
+      if (!response.ok) {
+        throw new Error("Error creating product")
+      }
 
       router.push("/admin/products")
     } catch (error) {
       console.error("Error creating product:", error)
+      toast.error("No se pudo crear el producto")
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      <InlineCreateDialog
+        title="Crear nueva categoría"
+        isOpen={categoryDialogOpen}
+        onClose={() => setCategoryDialogOpen(false)}
+        onSave={handleCreateCategory}
+      />
+      <InlineCreateDialog
+        title="Crear nueva marca"
+        isOpen={brandDialogOpen}
+        onClose={() => setBrandDialogOpen(false)}
+        onSave={handleCreateBrand}
+      />
+
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/admin/products">
@@ -153,20 +252,16 @@ export default function NewProductPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Nuevo Producto</h1>
-          <p className="text-muted-foreground">
-            Agrega un nuevo producto al catalogo
-          </p>
+          <h1 className="text-2xl font-bold">Nuevo producto</h1>
+          <p className="text-muted-foreground">Agrega un nuevo producto al catálogo</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Informacion Basica</CardTitle>
-            <CardDescription>
-              Datos principales del producto
-            </CardDescription>
+            <CardTitle>Información básica</CardTitle>
+            <CardDescription>Datos principales del producto</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -176,77 +271,71 @@ export default function NewProductPage() {
                   id="name"
                   placeholder="Nombre del producto"
                   {...register("name", {
-                    onChange: (e) => {
-                      setValue("slug", generateSlug(e.target.value))
+                    onChange: (event) => {
+                      setValue("slug", generateSlug(event.target.value))
                     },
                   })}
                 />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-                )}
+                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="slug">Slug (URL)</Label>
-                <Input
-                  id="slug"
-                  placeholder="nombre-del-producto"
-                  {...register("slug")}
-                />
-                {errors.slug && (
-                  <p className="text-sm text-destructive">{errors.slug.message}</p>
-                )}
+                <Label htmlFor="slug">Slug</Label>
+                <Input id="slug" placeholder="nombre-del-producto" {...register("slug")} />
+                {errors.slug && <p className="text-sm text-destructive">{errors.slug.message}</p>}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descripcion</Label>
+              <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
-                placeholder="Descripcion detallada del producto"
+                placeholder="Descripción detallada del producto"
                 rows={4}
                 {...register("description")}
               />
-              {errors.description && (
-                <p className="text-sm text-destructive">{errors.description.message}</p>
-              )}
+              {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria</Label>
-                <Select onValueChange={(value) => setValue("categoryId", value)}>
-                  <SelectTrigger id="categoryId">
-                    <SelectValue placeholder="Seleccionar categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.categoryId && (
-                  <p className="text-sm text-destructive">{errors.categoryId.message}</p>
-                )}
+                <Label htmlFor="categoryId">Categoría</Label>
+                <div className="flex gap-2">
+                  <Select onValueChange={(value) => setValue("categoryId", value)}>
+                    <SelectTrigger id="categoryId" className="flex-1">
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <InlineCreateButton onClick={() => setCategoryDialogOpen(true)} />
+                </div>
+                {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId.message}</p>}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="brandId">Marca</Label>
-                <Select onValueChange={(value) => setValue("brandId", value)}>
-                  <SelectTrigger id="brandId">
-                    <SelectValue placeholder="Seleccionar marca" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.brandId && (
-                  <p className="text-sm text-destructive">{errors.brandId.message}</p>
-                )}
+                <div className="flex gap-2">
+                  <Select onValueChange={(value) => setValue("brandId", value)}>
+                    <SelectTrigger id="brandId" className="flex-1">
+                      <SelectValue placeholder="Seleccionar marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <InlineCreateButton onClick={() => setBrandDialogOpen(true)} />
+                </div>
+                {errors.brandId && <p className="text-sm text-destructive">{errors.brandId.message}</p>}
               </div>
             </div>
           </CardContent>
@@ -254,94 +343,109 @@ export default function NewProductPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Precio e Inventario</CardTitle>
-            <CardDescription>
-              Configura precio y disponibilidad
-            </CardDescription>
+            <CardTitle>Precio</CardTitle>
+            <CardDescription>Configura precio de venta</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="price">Precio (S/)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...register("price", { valueAsNumber: true })}
-                />
-                {errors.price && (
-                  <p className="text-sm text-destructive">{errors.price.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="comparePrice">Precio anterior (opcional)</Label>
-                <Input
-                  id="comparePrice"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...register("comparePrice", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="stock">Stock</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  placeholder="0"
-                  {...register("stock", { valueAsNumber: true })}
-                />
-                {errors.stock && (
-                  <p className="text-sm text-destructive">{errors.stock.message}</p>
-                )}
-              </div>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="price">Precio (S/)</Label>
+              <Input id="price" type="number" step="0.01" {...register("price", { valueAsNumber: true })} />
+              {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="comparePrice">Precio anterior (opcional)</Label>
+              <Input
+                id="comparePrice"
+                type="number"
+                step="0.01"
+                {...register("comparePrice", { valueAsNumber: true })}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Imagenes</CardTitle>
-            <CardDescription>
-              Sube las imagenes del producto (máximo 5)
-            </CardDescription>
+            <CardTitle>Variantes</CardTitle>
+            <CardDescription>Talla, color y stock por combinación</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="hidden sm:grid sm:grid-cols-3 gap-2 px-1 text-sm font-medium text-muted-foreground">
+              <span>Talla</span>
+              <span>Color</span>
+              <span>Stock</span>
+            </div>
+            {variants.map((variant, index) => (
+              <div key={`variant-${index}`} className="grid gap-2 rounded-md border p-3 sm:grid-cols-3">
+                <Input
+                  placeholder="Talla (S, M, 42...)"
+                  value={variant.size}
+                  onChange={(event) => updateVariant(index, "size", event.target.value)}
+                />
+                <Input
+                  placeholder="Color (Negro, Blanco...)"
+                  value={variant.color}
+                  onChange={(event) => updateVariant(index, "color", event.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="Stock"
+                    value={variant.stock}
+                    onChange={(event) => updateVariant(index, "stock", Number(event.target.value))}
+                  />
+                  {variants.length > 1 && (
+                    <Button type="button" variant="outline" size="icon" onClick={() => removeVariant(index)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <Button type="button" variant="outline" onClick={addVariant}>
+              <Plus className="mr-2 h-4 w-4" />
+              Agregar variante
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Imágenes</CardTitle>
+            <CardDescription>Sube las imágenes del producto (máximo 5)</CardDescription>
           </CardHeader>
           <CardContent>
-            <ImageUpload
-              value={images}
-              onChange={setImages}
-              maxImages={5}
-            />
+            <ImageUpload value={images} onChange={setImages} maxImages={5} />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Opciones</CardTitle>
-            <CardDescription>
-              Configuraciones adicionales
-            </CardDescription>
+            <CardDescription>Configuraciones adicionales</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="isNew"
                 checked={watch("isNew")}
-                onCheckedChange={(checked) => setValue("isNew", !!checked)}
+                onCheckedChange={(checked) => setValue("isNew", Boolean(checked))}
               />
               <Label htmlFor="isNew" className="font-normal">
                 Marcar como producto nuevo
               </Label>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="isFeatured"
                 checked={watch("isFeatured")}
-                onCheckedChange={(checked) => setValue("isFeatured", !!checked)}
+                onCheckedChange={(checked) => setValue("isFeatured", Boolean(checked))}
               />
               <Label htmlFor="isFeatured" className="font-normal">
-                Mostrar en productos destacados
+                Mostrar en destacados
               </Label>
             </div>
           </CardContent>
@@ -358,7 +462,7 @@ export default function NewProductPage() {
                 Guardando...
               </>
             ) : (
-              "Guardar Producto"
+              "Guardar producto"
             )}
           </Button>
         </div>

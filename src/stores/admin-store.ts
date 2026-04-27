@@ -1,29 +1,13 @@
 import { create } from "zustand"
-
-interface DashboardStats {
-  totalProducts: number
-  totalCustomers: number
-  totalOrders: number
-  totalRevenue: number
-}
-
-interface OrdersByStatus {
-  pending: number
-  processing: number
-  shipped: number
-  delivered: number
-  cancelled: number
-}
-
-interface RecentOrder {
-  id: string
-  orderNumber: string
-  customer: string
-  email: string
-  total: number
-  status: string
-  createdAt: string
-}
+import type {
+  DashboardCommercialMetrics,
+  DashboardHistoryPoint,
+  DashboardOperationalMetrics,
+  DashboardRange,
+  DashboardStatsOverview,
+  OrdersByStatus,
+  RecentOrder,
+} from "@/types/admin-dashboard"
 
 interface AdminOrder {
   id: string
@@ -70,7 +54,11 @@ interface AdminUser {
 
 interface AdminState {
   // Dashboard
-  stats: DashboardStats | null
+  dashboardRange: DashboardRange
+  stats: DashboardStatsOverview | null
+  commercial: DashboardCommercialMetrics | null
+  history: DashboardHistoryPoint[]
+  operations: DashboardOperationalMetrics | null
   ordersByStatus: OrdersByStatus | null
   recentOrders: RecentOrder[]
 
@@ -85,14 +73,18 @@ interface AdminState {
   error: string | null
 
   // Actions
-  fetchDashboard: () => Promise<void>
+  fetchDashboard: (range?: DashboardRange) => Promise<void>
   fetchOrders: (params?: { status?: string; limit?: number; offset?: number }) => Promise<void>
   fetchUsers: (params?: { role?: string; status?: string }) => Promise<void>
   updateOrderStatus: (id: string, status: string) => Promise<void>
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
+  dashboardRange: "30d",
   stats: null,
+  commercial: null,
+  history: [],
+  operations: null,
   ordersByStatus: null,
   recentOrders: [],
   orders: [],
@@ -101,14 +93,18 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchDashboard: async () => {
+  fetchDashboard: async (range = "30d") => {
     set({ loading: true, error: null })
     try {
-      const response = await fetch("/api/admin/dashboard")
+      const response = await fetch(`/api/admin/dashboard?range=${range}`)
       if (!response.ok) throw new Error("Error fetching dashboard")
       const data = await response.json()
       set({
+        dashboardRange: data.range,
         stats: data.stats,
+        commercial: data.commercial,
+        history: data.history,
+        operations: data.operations,
         ordersByStatus: data.ordersByStatus,
         recentOrders: data.recentOrders,
         loading: false,

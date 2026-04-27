@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { Menu, Bell, Search } from "lucide-react"
+import { Bell, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -13,13 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { AdminMobileNav } from "./AdminMobileNav"
 
@@ -66,15 +58,15 @@ export function AdminHeader() {
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium">Admin</p>
-                <p className="text-xs text-muted-foreground">admin@basictechshop.com</p>
+                <p className="text-xs text-muted-foreground">admin@myotd.pe</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Perfil</DropdownMenuItem>
-            <DropdownMenuItem>Configuracion</DropdownMenuItem>
+            <DropdownMenuItem>Configuración</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
-              Cerrar Sesion
+              Cerrar Sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

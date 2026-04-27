@@ -56,6 +56,8 @@ function ProductsContent() {
   const activeFilterCount =
     filters.brands.length +
     filters.categories.length +
+    filters.sizes.length +
+    filters.colors.length +
     (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000 ? 1 : 0)
 
   return (

@@ -25,11 +25,11 @@ import { useUserStore } from "@/stores/user-store"
 const addressSchema = z.object({
   label: z.string().min(1, "La etiqueta es requerida"),
   name: z.string().min(1, "El nombre es requerido"),
-  phone: z.string().min(1, "El telefono es requerido"),
-  address: z.string().min(1, "La direccion es requerida"),
+  phone: z.string().min(1, "El teléfono es requerido"),
+  address: z.string().min(1, "La dirección es requerida"),
   city: z.string().min(1, "La ciudad es requerida"),
   state: z.string().min(1, "El departamento es requerido"),
-  zipCode: z.string().min(1, "El codigo postal es requerido"),
+  zipCode: z.string().min(1, "El código postal es requerido"),
   isDefault: z.boolean(),
 })
 
@@ -151,9 +151,9 @@ export default function EditAddressPage() {
             </Link>
           </Button>
           <div>
-            <h2 className="text-xl font-semibold">Editar Direccion</h2>
-            <p className="text-muted-foreground">
-              Modifica los datos de tu direccion
+            <h2 className="text-xl font-semibold">Editar Dirección</h2>
+<p className="text-muted-foreground">
+              Modifica los datos de tu dirección
             </p>
           </div>
         </div>
@@ -172,9 +172,9 @@ export default function EditAddressPage() {
             </Link>
           </Button>
           <div>
-            <h2 className="text-xl font-semibold">Direccion no encontrada</h2>
+            <h2 className="text-xl font-semibold">Dirección no encontrada</h2>
             <p className="text-muted-foreground">
-              La direccion que buscas no existe
+              La dirección que buscas no existe
             </p>
           </div>
         </div>
@@ -191,18 +191,18 @@ export default function EditAddressPage() {
           </Link>
         </Button>
         <div>
-          <h2 className="text-xl font-semibold">Editar Direccion</h2>
+          <h2 className="text-xl font-semibold">Editar Dirección</h2>
           <p className="text-muted-foreground">
-            Modifica los datos de tu direccion
+            Modifica los datos de tu dirección
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Informacion de la Direccion</CardTitle>
+          <CardTitle>Información de la Dirección</CardTitle>
           <CardDescription>
-            Actualiza los datos de tu direccion
+            Actualiza los datos de tu dirección
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -233,7 +233,7 @@ export default function EditAddressPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono</Label>
+              <Label htmlFor="phone">Teléfono</Label>
               <Input
                 id="phone"
                 placeholder="+51 999 888 777"
@@ -245,7 +245,7 @@ export default function EditAddressPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Direccion</Label>
+              <Label htmlFor="address">Dirección</Label>
               <Input
                 id="address"
                 placeholder="Av. Principal 123"
@@ -290,7 +290,7 @@ export default function EditAddressPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="zipCode">Codigo Postal</Label>
+                <Label htmlFor="zipCode">Código Postal</Label>
                 <Input
                   id="zipCode"
                   placeholder="15001"
@@ -309,7 +309,7 @@ export default function EditAddressPage() {
                 onCheckedChange={(checked) => setValue("isDefault", !!checked)}
               />
               <Label htmlFor="isDefault" className="font-normal">
-                Establecer como direccion predeterminada
+                Establecer como dirección predeterminada
               </Label>
             </div>
 

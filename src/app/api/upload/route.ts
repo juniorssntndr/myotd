@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cloudinary } from "@/lib/cloudinary"
+import { requireAdmin } from "@/lib/api-auth"
 
 export async function POST(request: NextRequest) {
   try {
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File | null
 
@@ -41,7 +47,7 @@ export async function POST(request: NextRequest) {
         cloudinary.uploader
           .upload_stream(
             {
-              folder: "basictech/products",
+              folder: "myotd/products",
               resource_type: "image",
               transformation: [
                 { width: 1200, height: 1200, crop: "limit" },
@@ -73,6 +79,11 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
     const { searchParams } = new URL(request.url)
     const publicId = searchParams.get("publicId")
 

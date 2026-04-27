@@ -3,7 +3,7 @@
 ---
 
 ## 1. Document Metadata
-- **Project Name:** ecommerce-basictech
+- **Project Name:** myotd
 - **Date:** 2026-01-03
 - **Prepared by:** TestSprite AI Team
 

@@ -1,9 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Eye, Loader2 } from "lucide-react"
+import {
+  AlertTriangle,
+  Boxes,
+  Eye,
+  Loader2,
+  MoreHorizontal,
+  PackageOpen,
+  PackageX,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react"
+import { InventoryHealthChart } from "@/components/admin/InventoryHealthChart"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -40,7 +54,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface Product {
   id: string
@@ -50,16 +64,169 @@ interface Product {
   category: string
   price: number
   originalPrice?: number
-  stock: number
   images: string[]
+  variants: Array<{
+    id: string
+    stock: number
+    size: string
+    color: string
+  }>
   isNew: boolean
   isFeatured: boolean
+  isActive: boolean
 }
 
 interface Category {
   id: string
   name: string
   slug: string
+}
+
+const LOW_STOCK_THRESHOLD = 5
+const numberFormatter = new Intl.NumberFormat("es-PE")
+
+function formatNumber(value: number) {
+  return numberFormatter.format(value)
+}
+
+function ProductMetricPane({
+  title,
+  subtitle,
+  value,
+  helper,
+  icon: Icon,
+  accent = "muted",
+  valueClassName,
+}: {
+  title: string
+  subtitle: string
+  value: string
+  helper: string
+  icon: LucideIcon
+  accent?: "brand" | "muted" | "warning" | "danger"
+  valueClassName?: string
+}) {
+  const accentClassName =
+    accent === "brand"
+      ? "bg-[var(--myotd-red-soft)] text-[var(--myotd-red)]"
+      : accent === "warning"
+      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+      : accent === "danger"
+      ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+      : "bg-muted/60 text-muted-foreground"
+
+  return (
+    <div className="flex h-full flex-col justify-between gap-3 p-4 lg:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            {title}
+          </p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${accentClassName}`}>
+          <Icon className="h-4 w-4" />
+        </span>
+      </div>
+
+      <div className="space-y-2">
+        <p className={valueClassName || "text-[clamp(1.7rem,2vw,2.2rem)] font-semibold tracking-tight"}>{value}</p>
+        <p className="text-sm text-muted-foreground">{helper}</p>
+      </div>
+    </div>
+  )
+}
+
+function ProductsSummaryBand({
+  productsCount,
+  categoriesCount,
+  inventoryUnits,
+  lowStockCount,
+  outOfStockCount,
+  activeProducts,
+  featuredProducts,
+}: {
+  productsCount: number
+  categoriesCount: number
+  inventoryUnits: number
+  lowStockCount: number
+  outOfStockCount: number
+  activeProducts: number
+  featuredProducts: number
+}) {
+  return (
+    <Card className="overflow-hidden border-border/60 bg-card/95 shadow-sm">
+      <CardContent className="p-0">
+        <div className="grid xl:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.9fr)_minmax(220px,0.9fr)_minmax(220px,0.9fr)] xl:divide-x xl:divide-border/60">
+          <div className="flex flex-col gap-4 p-4 lg:p-5">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="rounded-full border border-[var(--myotd-red-border)] bg-[var(--myotd-red-soft)] text-[var(--myotd-red)] hover:bg-[var(--myotd-red-soft)]">
+                  Catálogo
+                </Badge>
+                <span className="text-xs text-muted-foreground">Vista general del inventario</span>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                  Total de productos
+                </p>
+                <h2 className="text-[clamp(2.2rem,3.3vw,3.4rem)] font-semibold tracking-tight">
+                  {formatNumber(productsCount)}
+                </h2>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                {formatNumber(categoriesCount)} categorías activas · {formatNumber(activeProducts)} visibles en catálogo.
+              </p>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-xl border border-border/60 bg-muted/[0.18] px-3 py-2.5 text-sm">
+                <p className="text-xs text-muted-foreground">Inventario</p>
+                <p className="mt-1 font-medium text-foreground">{formatNumber(inventoryUnits)} unidades</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-muted/[0.18] px-3 py-2.5 text-sm">
+                <p className="text-xs text-muted-foreground">Destacados</p>
+                <p className="mt-1 font-medium text-foreground">{formatNumber(featuredProducts)} en vitrina</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-muted/[0.18] px-3 py-2.5 text-sm">
+                <p className="text-xs text-muted-foreground">Disponibles</p>
+                <p className="mt-1 font-medium text-foreground">{formatNumber(productsCount - outOfStockCount)} con stock</p>
+              </div>
+            </div>
+          </div>
+
+          <ProductMetricPane
+            title="Inventario total"
+            subtitle="Unidades acumuladas en variantes"
+            value={formatNumber(inventoryUnits)}
+            helper={`${formatNumber(featuredProducts)} productos destacados`}
+            icon={Boxes}
+            accent="muted"
+          />
+          <ProductMetricPane
+            title="Stock bajo"
+            subtitle={`Umbral actual: ${LOW_STOCK_THRESHOLD} unidades`}
+            value={formatNumber(lowStockCount)}
+            helper="Requieren reposición prioritaria"
+            icon={AlertTriangle}
+            accent="warning"
+            valueClassName="text-[clamp(1.7rem,2vw,2.2rem)] font-semibold tracking-tight text-amber-600 dark:text-amber-400"
+          />
+          <ProductMetricPane
+            title="Agotados"
+            subtitle="Sin unidades disponibles"
+            value={formatNumber(outOfStockCount)}
+            helper="Impactan la conversión del catálogo"
+            icon={PackageX}
+            accent="danger"
+            valueClassName="text-[clamp(1.7rem,2vw,2.2rem)] font-semibold tracking-tight text-rose-600 dark:text-rose-400"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function ProductsSkeleton() {
@@ -69,7 +236,7 @@ function ProductsSkeleton() {
         <TableRow>
           <TableHead className="w-[80px]">Imagen</TableHead>
           <TableHead>Producto</TableHead>
-          <TableHead>Categoria</TableHead>
+          <TableHead>Categoría</TableHead>
           <TableHead>Precio</TableHead>
           <TableHead>Stock</TableHead>
           <TableHead>Estado</TableHead>
@@ -153,8 +320,36 @@ export default function AdminProductsPage() {
     return matchesSearch && matchesCategory
   })
 
-  const inStockCount = products.filter((p) => p.stock > 0).length
-  const outOfStockCount = products.filter((p) => p.stock === 0).length
+  const getTotalStock = (product: Product) =>
+    product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+
+  const inventoryUnits = products.reduce((sum, product) => sum + getTotalStock(product), 0)
+  const inStockCount = products.filter((p) => getTotalStock(p) > 0).length
+  const outOfStockCount = products.filter((p) => getTotalStock(p) === 0).length
+  const lowStockCount = products.filter((p) => {
+    const stock = getTotalStock(p)
+    return stock > 0 && stock <= LOW_STOCK_THRESHOLD
+  }).length
+  const healthyStockCount = products.filter((p) => getTotalStock(p) > LOW_STOCK_THRESHOLD).length
+  const activeProducts = products.filter((p) => p.isActive).length
+  const featuredProducts = products.filter((p) => p.isFeatured).length
+  const categoryLabelMap = new Map(categories.map((category) => [category.slug, category.name]))
+  const criticalProducts = products
+    .map((product) => ({
+      id: product.id,
+      name: product.name,
+      category: categoryLabelMap.get(product.category) || product.category,
+      stock: getTotalStock(product),
+    }))
+    .filter((product) => product.stock <= LOW_STOCK_THRESHOLD)
+    .sort((left, right) => left.stock - right.stock)
+    .slice(0, 5)
+
+  const inventoryHealthData = [
+    { name: "Estable", value: healthyStockCount, fill: "var(--myotd-red-muted)" },
+    { name: "Stock bajo", value: lowStockCount, fill: "#f59e0b" },
+    { name: "Agotados", value: outOfStockCount, fill: "var(--myotd-red)" },
+  ]
 
   return (
     <div className="space-y-6">
@@ -163,7 +358,7 @@ export default function AdminProductsPage() {
         <div>
           <h1 className="text-2xl font-bold">Productos</h1>
           <p className="text-muted-foreground">
-            Administra el catalogo de productos de tu tienda
+            Administra el catálogo de productos de tu tienda
           </p>
         </div>
         <Button asChild>
@@ -174,80 +369,115 @@ export default function AdminProductsPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Productos
-            </CardTitle>
+      <ProductsSummaryBand
+        productsCount={products.length}
+        categoriesCount={categories.length}
+        inventoryUnits={inventoryUnits}
+        lowStockCount={lowStockCount}
+        outOfStockCount={outOfStockCount}
+        activeProducts={activeProducts}
+        featuredProducts={featuredProducts}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(330px,0.95fr)]">
+        <InventoryHealthChart data={inventoryHealthData} />
+
+        <Card className="border-border/60 bg-card/95 shadow-sm">
+          <CardHeader className="px-4 pb-2 pt-4">
+            <CardTitle>Radar operativo</CardTitle>
+            <CardDescription>Lo esencial para detectar urgencia, visibilidad y riesgo del catálogo.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{products.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              En Stock
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">{inStockCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Agotados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-600">{outOfStockCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Categorias
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{categories.length}</p>
+          <CardContent className="space-y-4 px-4 pb-4">
+            <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+              <div className="divide-y divide-border/60">
+                <div className="flex items-start justify-between gap-3 px-3 py-3">
+                  <div>
+                    <p className="text-sm font-medium">Disponibilidad</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Productos con stock disponible.</p>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight">{formatNumber(inStockCount)}</p>
+                </div>
+                <div className="flex items-start justify-between gap-3 px-3 py-3">
+                  <div>
+                    <p className="text-sm font-medium">Destacados</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Con prioridad comercial en vitrina.</p>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight">{formatNumber(featuredProducts)}</p>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-3 rounded-2xl border border-border/60 px-3 py-3.5">
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <PackageOpen className="h-4 w-4 text-[var(--myotd-red)]" />
+                  Productos críticos
+                </h3>
+                <p className="text-xs text-muted-foreground">Agotamiento o stock por debajo del umbral.</p>
+              </div>
+
+              {criticalProducts.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border/70 bg-muted/[0.16] px-3 py-4 text-sm text-muted-foreground">
+                  No hay productos en riesgo inmediato.
+                </div>
+              ) : (
+                <div className="divide-y divide-border/60 rounded-xl border border-border/60 bg-muted/[0.12]">
+                  {criticalProducts.map((product) => (
+                    <div key={product.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{product.category}</p>
+                      </div>
+                      <Badge variant={product.stock === 0 ? "destructive" : "secondary"}>
+                        {product.stock === 0 ? "Agotado" : `${product.stock} u.`}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar productos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.slug}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Card className="border-border/60 bg-card/95 shadow-sm">
+        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar productos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.slug}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
+      <Card className="border-border/60 bg-card/95 shadow-sm">
+        <CardHeader>
+          <CardTitle>Catálogo de productos</CardTitle>
+          <CardDescription>
+            {filteredProducts.length} resultado{filteredProducts.length === 1 ? "" : "s"} visibles con el filtro actual
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="overflow-x-auto p-0">
           {loading ? (
             <ProductsSkeleton />
           ) : (
@@ -256,7 +486,7 @@ export default function AdminProductsPage() {
                 <TableRow>
                   <TableHead className="w-[80px]">Imagen</TableHead>
                   <TableHead>Producto</TableHead>
-                  <TableHead>Categoria</TableHead>
+                  <TableHead>Categoría</TableHead>
                   <TableHead>Precio</TableHead>
                   <TableHead>Stock</TableHead>
                   <TableHead>Estado</TableHead>
@@ -293,9 +523,9 @@ export default function AdminProductsPage() {
                       </TableCell>
                       <TableCell className="capitalize">{product.category}</TableCell>
                       <TableCell>S/ {product.price.toFixed(2)}</TableCell>
-                      <TableCell>{product.stock}</TableCell>
+                      <TableCell>{getTotalStock(product)}</TableCell>
                       <TableCell>
-                        {product.stock > 0 ? (
+                        {getTotalStock(product) > 0 ? (
                           <Badge variant="default" className="bg-green-600">
                             En stock
                           </Badge>
@@ -349,7 +579,7 @@ export default function AdminProductsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion no se puede deshacer. El producto sera eliminado permanentemente.
+              Esta acción no se puede deshacer. El producto será eliminado permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -3,7 +3,7 @@
 import { Suspense, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { CheckCircle, Package, ArrowRight, Loader2 } from "lucide-react"
+import { CheckCircle, Package, ArrowRight, Loader2, Clock3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCartStore } from "@/stores/cart-store"
@@ -11,6 +11,9 @@ import { useCartStore } from "@/stores/cart-store"
 function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
+  const orderNumber = searchParams.get("order")
+  const status = searchParams.get("status")
+  const isPendingConfirmation = status === "pending"
   const clearCart = useCartStore((state) => state.clearCart)
 
   useEffect(() => {
@@ -19,22 +22,34 @@ function SuccessContent() {
   }, [clearCart])
 
   return (
-    <div className="container max-w-lg py-12">
-      <Card className="text-center">
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-6xl items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-lg text-center">
         <CardHeader className="pb-4">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${isPendingConfirmation ? "bg-amber-100" : "bg-green-100"}`}>
+            {isPendingConfirmation ? (
+              <Clock3 className="h-10 w-10 text-amber-600" />
+            ) : (
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            )}
           </div>
-          <CardTitle className="text-2xl">Pago exitoso</CardTitle>
+          <CardTitle className="text-2xl">
+            {isPendingConfirmation ? "Pedido recibido" : "Pago exitoso"}
+          </CardTitle>
           <CardDescription>
-            Tu pedido ha sido procesado correctamente
+            {isPendingConfirmation
+              ? "Tu pago quedó pendiente de confirmación manual. Te contactaremos para finalizarlo."
+              : "Tu pedido ha sido procesado correctamente"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="rounded-lg bg-muted p-4">
             <div className="flex items-center justify-center gap-2 text-sm">
               <Package className="h-4 w-4" />
-              <span>Recibiras un email con los detalles de tu pedido</span>
+              <span>
+                {isPendingConfirmation
+                  ? "Recibirás confirmación del pedido por WhatsApp o email"
+                  : "Recibiras un email con los detalles de tu pedido"}
+              </span>
             </div>
           </div>
 
@@ -52,9 +67,11 @@ function SuccessContent() {
             </Button>
           </div>
 
-          {sessionId && (
+          {(sessionId || orderNumber) && (
             <p className="text-xs text-muted-foreground">
-              ID de transaccion: {sessionId.slice(0, 20)}...
+              {sessionId
+                ? `ID de transacción: ${sessionId.slice(0, 20)}...`
+                : `Pedido: ${orderNumber}`}
             </p>
           )}
         </CardContent>
@@ -65,8 +82,8 @@ function SuccessContent() {
 
 function SuccessSkeleton() {
   return (
-    <div className="container max-w-lg py-12">
-      <Card className="text-center">
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-6xl items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-lg text-center">
         <CardContent className="py-12">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
         </CardContent>

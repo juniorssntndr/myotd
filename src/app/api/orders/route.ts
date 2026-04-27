@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { requireAdmin } from "@/lib/api-auth"
 
 export async function GET() {
   try {
-    // Get authenticated user
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autorizado" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
     const orders = await prisma.order.findMany({
@@ -19,7 +16,18 @@ export async function GET() {
       include: {
         items: {
           include: {
-            product: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                images: true,
+                brand: { select: { name: true } },
+              },
+            },
+            variant: {
+              select: { id: true, size: true, color: true, sku: true },
+            },
           },
         },
         address: true,
@@ -27,7 +35,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     })
 
-    const transformedOrders = orders.map((order) => ({
+    const transformedOrders = orders.map((order: typeof orders[number]) => ({
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status.toLowerCase(),
@@ -38,34 +46,48 @@ export async function GET() {
       notes: order.notes,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
-      shippingAddress: `${order.address.address}, ${order.address.city}`,
-      items: order.items.map((item) => ({
+      shippingAddress: {
+        name: order.address.name,
+        phone: order.address.phone,
+        address: order.address.address,
+        city: order.address.city,
+        district: order.address.state,
+        zipCode: order.address.zipCode,
+      },
+      items: order.items.map((item: typeof order.items[number]) => ({
+        id: item.id,
         productId: item.productId,
+        variantId: item.variantId,
         name: item.name,
-        brand: item.product.id, // Would need to join with brand
+        brand: item.product.brand.name,
+        size: item.variant?.size || "",
+        color: item.variant?.color || "",
+        sku: item.variant?.sku || "",
         price: Number(item.price),
         quantity: item.quantity,
         image: item.product.images[0] || "",
+        total: Number(item.total),
       })),
     }))
 
     return NextResponse.json(transformedOrders)
   } catch (error) {
     console.error("Error fetching orders:", error)
-    return NextResponse.json(
-      { error: "Error fetching orders" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error fetching orders" }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
     const body = await request.json()
 
-    // Generate order number
     const orderCount = await prisma.order.count()
-    const orderNumber = `ORD-${new Date().getFullYear()}-${String(orderCount + 1).padStart(4, "0")}`
+    const orderNumber = `MYOTD-${new Date().getFullYear()}-${String(orderCount + 1).padStart(5, "0")}`
 
     const order = await prisma.order.create({
       data: {
@@ -79,12 +101,19 @@ export async function POST(request: NextRequest) {
         userId: body.userId,
         addressId: body.addressId,
         items: {
-          create: body.items.map((item: { productId: string; name: string; price: number; quantity: number }) => ({
+          create: body.items.map((item: {
+            productId: string
+            variantId?: string
+            name: string
+            price: number
+            quantity: number
+          }) => ({
+            productId: item.productId,
+            variantId: item.variantId,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
             total: item.price * item.quantity,
-            productId: item.productId,
           })),
         },
       },
@@ -105,9 +134,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Error creating order:", error)
-    return NextResponse.json(
-      { error: "Error creating order" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error creating order" }, { status: 500 })
   }
 }

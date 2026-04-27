@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useSession, signOut } from "next-auth/react"
 import { Search, ShoppingCart, Heart, User, LogOut, Settings, Package, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,15 +19,18 @@ import {
 import { ThemeToggle } from "./ThemeToggle"
 import { MobileNav } from "./MobileNav"
 import { useCartStore } from "@/stores/cart-store"
+import { useFavoritesStore } from "@/stores/favorites-store"
 
 export function Header() {
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
   const itemCount = useCartStore((state) => state.getItemCount())
+  const favoritesCount = useFavoritesStore((state) => state.favorites.length)
+  const favoritesHydrated = useFavoritesStore((state) => state.hydrated)
   const { data: session, status } = useSession()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,12 +38,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">BT</span>
-            </div>
-            <span className="hidden text-xl font-bold sm:inline-block">
-              BasicTechShop
-            </span>
+            <Image src="/myotd-logo.png" alt="Myotd" width={150} height={52} className="h-10 w-auto shrink-0" priority />
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -48,7 +47,7 @@ export function Header() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Buscar productos..."
+                placeholder="Buscar estilo..."
                 className="w-full pl-10 pr-4"
               />
             </div>
@@ -65,16 +64,26 @@ export function Header() {
             {/* Products Link */}
             <Link href="/products" className="hidden md:block">
               <Button variant="ghost" size="sm" className="font-semibold">
-                PRODUCTOS
+                CATÁLOGO
               </Button>
             </Link>
 
             <ThemeToggle />
 
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Heart className="h-4 w-4" />
-              <span className="sr-only">Favoritos</span>
-            </Button>
+            <Link href="/profile/favorites">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                <Heart className="h-4 w-4" />
+                {mounted && favoritesHydrated && favoritesCount > 0 && (
+                  <Badge
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                    variant="destructive"
+                  >
+                    {favoritesCount > 99 ? "99+" : favoritesCount}
+                  </Badge>
+                )}
+                <span className="sr-only">Favoritos</span>
+              </Button>
+            </Link>
 
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative h-9 w-9">
@@ -180,11 +189,11 @@ export function Header() {
         <div className="pb-3 md:hidden">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar productos..."
-              className="w-full pl-10 pr-4"
-            />
+<Input
+                type="search"
+                placeholder="Buscar estilo..."
+                className="w-full pl-10 pr-4"
+              />
           </div>
         </div>
       </div>

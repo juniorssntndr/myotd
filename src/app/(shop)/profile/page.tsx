@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect } from "react"
 import { useSession } from "next-auth/react"
@@ -128,9 +128,9 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Informacion Personal</CardTitle>
+            <CardTitle>Información Personal</CardTitle>
             <CardDescription>
-              Administra tu informacion personal
+              Administra tu información personal
             </CardDescription>
           </div>
           <Button variant="outline" size="sm">
@@ -163,9 +163,9 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Contrasena</p>
+              <p className="font-medium">Contraseña</p>
               <p className="text-sm text-muted-foreground">
-                Cambia tu contrasena regularmente
+                Cambia tu contraseña regularmente
               </p>
             </div>
             <Button variant="outline">Cambiar</Button>
@@ -173,7 +173,7 @@ export default function ProfilePage() {
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Autenticacion de dos factores</p>
+              <p className="font-medium">Autenticación de dos factores</p>
               <p className="text-sm text-muted-foreground">
                 Agrega una capa extra de seguridad
               </p>

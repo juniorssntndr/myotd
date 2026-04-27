@@ -9,69 +9,140 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SHIPPING_ZONES } from "@/lib/shipping"
+import { ShippingAddress } from "@/types"
 
-export function ShippingForm() {
+interface ShippingFormProps {
+  value: ShippingAddress
+  onChange: (data: ShippingAddress) => void
+}
+
+const LIMA_DISTRICTS = SHIPPING_ZONES.find((z) => z.id === "lima-centro")?.districts || []
+const LIMA_SUR_DISTRICTS = SHIPPING_ZONES.find((z) => z.id === "lima-sur")?.districts || []
+const LIMA_NORTE_DISTRICTS = SHIPPING_ZONES.find((z) => z.id === "lima-norte")?.districts || []
+const LIMA_ESTE_DISTRICTS = SHIPPING_ZONES.find((z) => z.id === "lima-este")?.districts || []
+const CALLAO_DISTRICTS = SHIPPING_ZONES.find((z) => z.id === "callao")?.districts || []
+
+export function ShippingForm({ value, onChange }: ShippingFormProps) {
+  const handleCityChange = (city: string) => {
+    onChange({
+      ...value,
+      city,
+      district: city === "Provincia" ? "Provincia" : "",
+    })
+  }
+
+  const handleDistrictChange = (district: string) => {
+    onChange({ ...value, district })
+  }
+
+  const handleChange = (field: keyof ShippingAddress, next: string) => {
+    onChange({ ...value, [field]: next })
+  }
+
+  const getDistricts = () => {
+    switch (value.city) {
+      case "Lima Centro":
+        return LIMA_DISTRICTS
+      case "Lima Sur":
+        return LIMA_SUR_DISTRICTS
+      case "Lima Norte":
+        return LIMA_NORTE_DISTRICTS
+      case "Lima Este":
+        return LIMA_ESTE_DISTRICTS
+      case "Callao":
+        return CALLAO_DISTRICTS
+      default:
+        return []
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Informacion de Envio</h2>
+      <h2 className="text-lg font-semibold">Información de Envío</h2>
+
+      <div className="space-y-2">
+        <Label htmlFor="name">Nombre Completo</Label>
+        <Input
+          id="name"
+          placeholder="Juan Pérez"
+          value={value.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone">Teléfono</Label>
+        <Input
+          id="phone"
+          type="tel"
+          placeholder="+51 999 888 777"
+          value={value.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="address">Dirección</Label>
+        <Input
+          id="address"
+          placeholder="Av. Principal 123, Dpto. 4"
+          value={value.address}
+          onChange={(e) => handleChange("address", e.target.value)}
+        />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="firstName">Nombre</Label>
-          <Input id="firstName" placeholder="Juan" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Apellido</Label>
-          <Input id="lastName" placeholder="Perez" />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">Correo Electronico</Label>
-        <Input id="email" type="email" placeholder="juan@ejemplo.com" />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="phone">Telefono</Label>
-        <Input id="phone" type="tel" placeholder="+51 999 888 777" />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="address">Direccion</Label>
-        <Input id="address" placeholder="Av. Principal 123" />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" placeholder="Lima" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="state">Departamento</Label>
-          <Select>
-            <SelectTrigger id="state">
+          <Label htmlFor="city">Zona</Label>
+          <Select value={value.city} onValueChange={handleCityChange}>
+            <SelectTrigger id="city">
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="lima">Lima</SelectItem>
-              <SelectItem value="arequipa">Arequipa</SelectItem>
-              <SelectItem value="cusco">Cusco</SelectItem>
-              <SelectItem value="trujillo">La Libertad</SelectItem>
-              <SelectItem value="piura">Piura</SelectItem>
+              <SelectItem value="Lima Centro">Lima Centro</SelectItem>
+              <SelectItem value="Lima Sur">Lima Sur</SelectItem>
+              <SelectItem value="Lima Norte">Lima Norte</SelectItem>
+              <SelectItem value="Lima Este">Lima Este</SelectItem>
+              <SelectItem value="Callao">Callao</SelectItem>
+              <SelectItem value="Provincia">Provincia</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
-          <Label htmlFor="zip">Codigo Postal</Label>
-          <Input id="zip" placeholder="15001" />
+          <Label htmlFor="district">Distrito</Label>
+          {value.city === "Provincia" ? (
+            <Input
+              id="district"
+              placeholder="Distrito o provincia"
+              value={value.district}
+              onChange={(e) => handleDistrictChange(e.target.value)}
+            />
+          ) : (
+            <Select value={value.district} onValueChange={handleDistrictChange}>
+              <SelectTrigger id="district">
+                <SelectValue placeholder="Seleccionar" />
+              </SelectTrigger>
+              <SelectContent>
+                {getDistricts().map((district) => (
+                  <SelectItem key={district} value={district}>
+                    {district}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notas adicionales (opcional)</Label>
+        <Label htmlFor="zipCode">Código Postal</Label>
         <Input
-          id="notes"
-          placeholder="Instrucciones de entrega, referencias, etc."
+          id="zipCode"
+          placeholder="15001"
+          value={value.zipCode}
+          onChange={(e) => handleChange("zipCode", e.target.value)}
         />
       </div>
     </div>

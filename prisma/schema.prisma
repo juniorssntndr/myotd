@@ -1,14 +1,201 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client"
+  output   = "../src/generated"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-// ==================== ENUMS ====================
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  phone     String?
+  avatar    String?
+  role      UserRole   @default(CUSTOMER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  addresses Address[]
+  favoriteBrands FavoriteBrand[]
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  icon      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  logo        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  products    Product[]
+  favoritedBy FavoriteBrand[]
+
+  @@map("brands")
+}
+
+model FavoriteBrand {
+  userId    String
+  brandId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@id([userId, brandId])
+  @@index([brandId])
+  @@map("favorite_brands")
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  description  String?
+  price        Decimal          @db.Decimal(10, 2)
+  comparePrice Decimal?         @db.Decimal(10, 2)
+  images       String[]
+  specs        Json?
+  isNew        Boolean          @default(false)
+  isFeatured   Boolean          @default(false)
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  categoryId   String
+  brandId      String
+  orderItems   OrderItem[]
+  variants     ProductVariant[]
+  brand        Brand            @relation(fields: [brandId], references: [id])
+  category     Category         @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([slug])
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  sku        String      @unique
+  size       String
+  color      String
+  stock      Int         @default(0)
+  productId  String
+  orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, size, color])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  label     String
+  name      String
+  phone     String
+  address   String
+  city      String
+  state     String
+  zipCode   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders    Order[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  shipping        Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  userId          String
+  addressId       String
+  stripeSessionId String?
+  paymentMethod   String
+  culqiPaymentId  String?
+  items           OrderItem[]
+  address         Address     @relation(fields: [addressId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String          @id @default(cuid())
+  name      String
+  price     Decimal         @db.Decimal(10, 2)
+  quantity  Int
+  total     Decimal         @db.Decimal(10, 2)
+  orderId   String
+  productId String
+  variantId String?
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model StoreSettings {
+  id                    String   @id @default("singleton")
+  storeName             String   @default("Myotd")
+  storeEmail            String   @default("info@myotd.pe")
+  storePhone            String   @default("+51 999 888 777")
+  storeAddress          String   @default("Av. Lima 123, Lima")
+  storeDescription      String   @default("Moda urbana multimarca para Perú")
+  timezone              String   @default("america-lima")
+  currency              String   @default("pen")
+  showOutOfStock        Boolean  @default(true)
+  showStockQuantity     Boolean  @default(true)
+  allowReviews          Boolean  @default(true)
+  standardShippingCost  Decimal  @default(15.00) @db.Decimal(10, 2)
+  freeShippingThreshold Decimal  @default(200.00) @db.Decimal(10, 2)
+  facebook              String   @default("")
+  twitter               String   @default("")
+  instagram             String   @default("")
+  youtube               String   @default("")
+  tiktok                String   @default("")
+  notifyNewOrders       Boolean  @default(true)
+  notifyFailedPayments  Boolean  @default(true)
+  notifyLowStock        Boolean  @default(true)
+  notifyNewUsers        Boolean  @default(true)
+  payCard               Boolean  @default(true)
+  payTransfer           Boolean  @default(true)
+  payWallet             Boolean  @default(true)
+  payCashOnDelivery     Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+
+  @@map("store_settings")
+}
 
 enum UserRole {
   ADMIN
@@ -36,145 +223,4 @@ enum PaymentMethod {
   TRANSFER
   WALLET
   CASH_ON_DELIVERY
-}
-
-// ==================== MODELS ====================
-
-model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  password  String
-  name      String
-  phone     String?
-  avatar    String?
-  role      UserRole   @default(CUSTOMER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  addresses Address[]
-  orders    Order[]
-
-  @@map("users")
-}
-
-model Category {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  icon      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  products Product[]
-
-  @@map("categories")
-}
-
-model Brand {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  logo      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  products Product[]
-
-  @@map("brands")
-}
-
-model Product {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  description  String?
-  price        Decimal  @db.Decimal(10, 2)
-  comparePrice Decimal? @db.Decimal(10, 2)
-  stock        Int      @default(0)
-  images       String[]
-  specs        Json?
-  isNew        Boolean  @default(false)
-  isFeatured   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  brandId String
-  brand   Brand @relation(fields: [brandId], references: [id])
-
-  orderItems OrderItem[]
-
-  @@index([categoryId])
-  @@index([brandId])
-  @@index([slug])
-  @@map("products")
-}
-
-model Address {
-  id        String   @id @default(cuid())
-  label     String
-  name      String
-  phone     String
-  address   String
-  city      String
-  state     String
-  zipCode   String
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  orders Order[]
-
-  @@index([userId])
-  @@map("addresses")
-}
-
-model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  status          OrderStatus @default(PENDING)
-  subtotal        Decimal     @db.Decimal(10, 2)
-  shipping        Decimal     @db.Decimal(10, 2)
-  total           Decimal     @db.Decimal(10, 2)
-  paymentMethod   String
-  stripeSessionId String?
-  notes           String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  addressId String
-  address   Address @relation(fields: [addressId], references: [id])
-
-  items OrderItem[]
-
-  @@index([userId])
-  @@index([orderNumber])
-  @@map("orders")
-}
-
-model OrderItem {
-  id       String  @id @default(cuid())
-  name     String
-  price    Decimal @db.Decimal(10, 2)
-  quantity Int
-  total    Decimal @db.Decimal(10, 2)
-
-  orderId String
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-
-  @@index([orderId])
-  @@map("order_items")
 }

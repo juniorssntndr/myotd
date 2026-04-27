@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { useEffect, useState } from "react"
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { categories } from "@/data/mock-products"
+import { useCategoriesStore } from "@/stores/categories-store"
 
 interface CategoryFilterProps {
   selectedCategories: string[]
@@ -16,6 +16,13 @@ export function CategoryFilter({
   onCategoriesChange,
 }: CategoryFilterProps) {
   const [isOpen, setIsOpen] = useState(true)
+  const { categories, loading, fetchCategories } = useCategoriesStore()
+
+  useEffect(() => {
+    if (categories.length === 0) {
+      fetchCategories()
+    }
+  }, [categories.length, fetchCategories])
 
   const handleCategoryToggle = (categorySlug: string) => {
     if (selectedCategories.includes(categorySlug)) {
@@ -31,7 +38,7 @@ export function CategoryFilter({
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between py-2 font-medium"
       >
-        Categoria
+        Categoría
         {isOpen ? (
           <ChevronUp className="h-4 w-4" />
         ) : (
@@ -41,24 +48,37 @@ export function CategoryFilter({
 
       {isOpen && (
         <div className="mt-2 space-y-2">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`category-${category.id}`}
-                checked={selectedCategories.includes(category.slug)}
-                onCheckedChange={() => handleCategoryToggle(category.slug)}
-              />
-              <Label
-                htmlFor={`category-${category.id}`}
-                className="flex flex-1 cursor-pointer items-center justify-between text-sm"
-              >
-                <span>{category.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {category.productCount}
-                </span>
-              </Label>
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
-          ))}
+          ) : (
+            <>
+              {categories.map((category) => (
+                <div key={category.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`category-${category.id}`}
+                    checked={selectedCategories.includes(category.slug)}
+                    onCheckedChange={() => handleCategoryToggle(category.slug)}
+                  />
+                  <Label
+                    htmlFor={`category-${category.id}`}
+                    className="flex flex-1 cursor-pointer items-center justify-between text-sm"
+                  >
+                    <span>{category.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {category.productCount}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+              {categories.length === 0 && !loading && (
+                <p className="text-center text-xs text-muted-foreground py-2">
+                  No se encontraron categorías
+                </p>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

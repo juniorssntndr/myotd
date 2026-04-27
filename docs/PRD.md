@@ -1,174 +1,56 @@
-# PRD: BasicTechShop
+﻿# PRD: Myotd
 
-## 1. Resumen Ejecutivo
+## 1. Executive Summary
+Myotd is a fashion e-commerce focused on urban and casual style for women and men in Peru.
+The MVP combines recognized brands and accessible products, with direct web checkout and strong brand identity.
 
-**BasicTechShop** es una plataforma e-commerce especializada en productos de computación (hardware, periféricos y componentes). El sistema permite a los usuarios navegar, filtrar y comprar productos, mientras que los administradores gestionan el inventario, usuarios y pedidos.
+| Aspect | Detail |
+|---|---|
+| Business type | B2C fashion e-commerce |
+| Launch market | Peru (national shipping) |
+| Positioning | Urban multi-brand, accessible pricing |
+| Product range at launch | 25 to 35 products |
+| Current status | API + UI integrated with real checkout contract |
 
-| Aspecto | Detalle |
-|---------|---------|
-| **Tipo** | E-commerce B2C |
-| **Mercado** | Productos de computación |
-| **Plataforma** | Web (responsive) |
-| **Estado actual** | UI implementada con datos mock |
+## 2. Core Business Goals
+- Sell directly from the web with full cart and checkout flow.
+- Build Myotd brand presence with a modern, minimal urban look (white + red).
+- Keep product operations simple for launch: admin CRUD, variant stock, and order visibility.
 
----
+## 3. Target Customer
+- Age: 17 to 30.
+- Profile: urban/casual style, mid-level spending.
+- Priority products: polos, hoodies, sets, sneakers, accessories.
 
-## 2. Stack Tecnológico
+## 4. MVP Scope
+### Public Store
+- Home, product listing, product detail, cart, checkout.
+- Filters: category, brand, size, color, price.
+- Variant selection required (size + color) before add to cart.
 
-| Capa | Tecnología |
-|------|------------|
-| Framework | Next.js 16 (App Router) |
-| Lenguaje | TypeScript |
-| Base de datos | PostgreSQL (planificado) |
-| ORM | Prisma |
-| UI Components | shadcn/ui (estilo "new-york") |
-| Styling | Tailwind CSS v4 (OKLCH) |
-| Iconos | Lucide React |
-| Tema | next-themes (dark/light) |
-| Estado global | Zustand |
-| Formularios | react-hook-form + Zod |
-| Auth | NextAuth.js |
+### Checkout and Payment
+- Main gateway: Culqi.
+- Payment methods shown in UX: card, wallet (Yape/Plin), transfer.
+- Checkout API contract uses explicit `productId + variantId` for every item.
 
----
+### Orders and Stock
+- Orders keep variant snapshot fields per item: `variantId`, `size`, `color`, `sku`.
+- Stock is managed by variant, not product-level stock.
+- Cancel/refund flows restore variant stock.
 
-## 3. Usuarios y Roles
+### Admin
+- Product CRUD with variants (create, update, remove/disable behavior).
+- Order monitoring with item-level variant data.
+- Basic dashboard stats and operations baseline.
 
-| Rol | Descripción | Permisos clave |
-|-----|-------------|----------------|
-| **CUSTOMER** | Cliente final | Navegar, comprar, gestionar su perfil y direcciones |
-| **MODERATOR** | Vendedor/Staff | Todo lo anterior + gestionar productos, categorías, marcas y ver todos los pedidos |
-| **ADMIN** | Administrador | Todo lo anterior + gestionar usuarios y configuración del sistema |
+## 5. Non-Functional Requirements
+- Responsive mobile-first UX.
+- Stable lint and TypeScript baseline.
+- No server actions for core flows; route handlers only.
+- Global state with Zustand; forms with react-hook-form + zod.
 
----
-
-## 4. Funcionalidades Principales
-
-### 4.1 Tienda Pública
-- **Homepage**: Hero banner, categorías destacadas, productos destacados, sección de marcas
-- **Catálogo** (`/products`): Grid de productos con filtros (marca, precio, categoría), ordenamiento y vista grid/lista
-- **Detalle de producto** (`/products/[id]`): Galería de imágenes, especificaciones, selector de cantidad, productos relacionados
-- **Carrito** (`/cart`): Lista de items, cantidades editables, resumen con subtotal/envío/total
-- **Checkout** (`/checkout`): Proceso en pasos (Datos → Envío → Pago → Confirmación)
-
-### 4.2 Autenticación
-- Registro de usuarios (email/password)
-- Login con credenciales
-- Protección de rutas por rol
-
-### 4.3 Perfil de Usuario
-- Información personal y estadísticas
-- Historial de pedidos
-- Gestión de direcciones (CRUD)
-- Productos favoritos
-- Configuración de cuenta
-
-### 4.4 Panel de Administración
-- **Dashboard**: Estadísticas de ventas, pedidos, usuarios
-- **Productos**: CRUD completo con imágenes y especificaciones
-- **Usuarios**: Gestión y asignación de roles
-- **Pagos/Órdenes**: Historial y cambio de estados
-- **Configuración**: Ajustes del sistema
-
----
-
-## 5. Modelo de Datos
-
-### Entidades Principales
-
-```
-User ──┬── Address (1:N)
-       └── Order (1:N) ──── OrderItem (1:N) ──── Product
-                                                    │
-Category (1:N) ─────────────────────────────────────┤
-Brand (1:N) ────────────────────────────────────────┘
-```
-
-### Estados de Pedido
-```
-PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED
-    └──────────────────────────────────────→ CANCELLED
-```
-
-### Métodos de Pago
-- Tarjeta (CARD)
-- Transferencia (TRANSFER)
-- Billetera digital (WALLET)
-- Contra entrega (CASH_ON_DELIVERY)
-
----
-
-## 6. Estructura de Páginas
-
-| Sección | Cantidad | Rutas ejemplo |
-|---------|----------|---------------|
-| Públicas | 6 | `/`, `/products`, `/products/[id]`, `/cart`, `/login`, `/register` |
-| Checkout | 3 | `/checkout`, `/checkout/success`, `/checkout/cancel` |
-| Perfil | 7 | `/profile`, `/profile/orders`, `/profile/addresses/*` |
-| Admin | 7 | `/admin`, `/admin/products/*`, `/admin/users/*`, `/admin/payments` |
-| **Total** | **23** | |
-
----
-
-## 7. API Endpoints
-
-| Recurso | Endpoints |
-|---------|-----------|
-| Auth | `POST /api/auth/register`, `GET/POST /api/auth/[...nextauth]` |
-| Products | `GET/POST /api/products`, `GET/PUT/DELETE /api/products/[id]` |
-| Categories | `GET /api/categories` |
-| Brands | `GET /api/brands` |
-| Orders | `GET/POST /api/orders`, `GET /api/orders/[id]` |
-| Addresses | CRUD en `/api/addresses` |
-| Users | `GET/POST /api/users` (admin) |
-| Admin | `GET /api/admin/dashboard`, `GET /api/admin/orders` |
-| Payments | `POST /api/checkout`, `POST /api/webhook/stripe` |
-
----
-
-## 8. Categorías de Productos
-
-- Computadoras/PCs
-- Monitores
-- Teclados
-- Mouse
-- Audífonos
-- Almacenamiento
-- Componentes (GPU, RAM, etc.)
-
-### Marcas Soportadas
-ASUS, MSI, Corsair, Logitech, Razer, HyperX, Kingston, Samsung, LG, Dell, NVIDIA, AMD
-
----
-
-## 9. Requisitos No Funcionales
-
-| Aspecto | Requisito |
-|---------|-----------|
-| **Responsive** | Mobile-first, soporte completo desktop/tablet/mobile |
-| **Tema** | Soporte dark/light mode |
-| **Accesibilidad** | Nivel básico (WCAG) |
-| **SEO** | Server-side rendering con Next.js |
-| **Performance** | Skeletons para loading states |
-
----
-
-## 10. Exclusiones (No incluido)
-
-- Sistema de cupones/descuentos
-- Reseñas de productos
-- Wishlist avanzada
-- Multi-idioma
-- Multi-moneda
-- Integración con marketplaces externos
-
----
-
-## 11. Fases de Implementación
-
-| Fase | Estado | Descripción |
-|------|--------|-------------|
-| 1. UI con datos mock | ✅ Completada | Layout, componentes, páginas con datos estáticos |
-| 2. Backend (Prisma/PostgreSQL) | 🔄 En progreso | Modelo de datos, API routes |
-| 3. Autenticación | Pendiente | NextAuth.js con credenciales |
-| 4. Integración de pagos | Pendiente | Stripe Checkout |
-| 5. Deploy y optimización | Pendiente | Vercel + PostgreSQL |
+## 6. Exclusions for this MVP
+- Coupon engine.
+- Advanced recommendation engine.
+- Marketplace integrations.
+- Multi-currency and multi-language.

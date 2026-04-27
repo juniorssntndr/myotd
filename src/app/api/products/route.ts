@@ -1,14 +1,73 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { transformProduct } from "@/lib/transformers"
+import { requireAdmin } from "@/lib/api-auth"
+
+type ProductVariantInput = {
+  id?: string
+  sku: string
+  size: string
+  color: string
+  stock: number
+}
+
+type ProductInput = {
+  name: string
+  slug: string
+  description?: string
+  price: number
+  comparePrice?: number
+  images?: string[]
+  isNew?: boolean
+  isFeatured?: boolean
+  isActive?: boolean
+  categoryId: string
+  brandId: string
+  variants: ProductVariantInput[]
+}
+
+function normalizeSort(sortBy: string) {
+  switch (sortBy) {
+    case "price-asc":
+      return { price: "asc" as const }
+    case "price-desc":
+      return { price: "desc" as const }
+    case "rating":
+    case "popular":
+      return { createdAt: "desc" as const }
+    default:
+      return { createdAt: "desc" as const }
+  }
+}
+
+function validateProductInput(body: ProductInput): string | null {
+  if (!body.name || !body.slug || !body.categoryId || !body.brandId) {
+    return "name, slug, categoryId y brandId son requeridos"
+  }
+
+  if (!Array.isArray(body.variants) || body.variants.length === 0) {
+    return "Debes registrar al menos una variante"
+  }
+
+  const invalidVariant = body.variants.find(
+    (variant) => !variant.sku || !variant.size || !variant.color || Number.isNaN(Number(variant.stock))
+  )
+
+  if (invalidVariant) {
+    return "Todas las variantes deben incluir sku, talla, color y stock"
+  }
+
+  return null
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
 
-    // Query params
     const category = searchParams.get("category")
     const brand = searchParams.get("brand")
+    const size = searchParams.get("size")
+    const color = searchParams.get("color")
     const minPrice = searchParams.get("minPrice")
     const maxPrice = searchParams.get("maxPrice")
     const sortBy = searchParams.get("sortBy") || "newest"
@@ -18,7 +77,6 @@ export async function GET(request: NextRequest) {
     const offset = searchParams.get("offset")
     const search = searchParams.get("search")
 
-    // Build where clause
     const where: Record<string, unknown> = {
       isActive: true,
     }
@@ -52,22 +110,19 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    // Build orderBy
-    let orderBy: Record<string, string> = { createdAt: "desc" }
-    switch (sortBy) {
-      case "price-asc":
-        orderBy = { price: "asc" }
-        break
-      case "price-desc":
-        orderBy = { price: "desc" }
-        break
-      case "newest":
-        orderBy = { createdAt: "desc" }
-        break
-      case "popular":
-        orderBy = { stock: "desc" } // Placeholder - would use sales count
-        break
+    if (size || color) {
+      where.variants = {
+        some: {
+          ...(size ? { size } : {}),
+          ...(color ? { color } : {}),
+          stock: { gt: 0 },
+        },
+      }
     }
+
+    const orderBy = normalizeSort(sortBy)
+    const take = limit ? Number(limit) : undefined
+    const skip = offset ? Number(offset) : undefined
 
     const products = await prisma.product.findMany({
       where,
@@ -75,31 +130,52 @@ export async function GET(request: NextRequest) {
       include: {
         category: true,
         brand: true,
+        variants: true,
       },
-      take: limit ? Number(limit) : undefined,
-      skip: offset ? Number(offset) : undefined,
+      take,
+      skip,
     })
+
+    const transformed = products.map(transformProduct)
+
+    const sorted =
+      sortBy === "popular"
+        ? transformed.sort(
+            (a, b) =>
+              b.variants.reduce((sum, variant) => sum + variant.stock, 0) -
+              a.variants.reduce((sum, variant) => sum + variant.stock, 0)
+          )
+        : sortBy === "rating"
+        ? transformed.sort((a, b) => b.rating - a.rating)
+        : transformed
 
     const total = await prisma.product.count({ where })
 
     return NextResponse.json({
-      products: products.map(transformProduct),
+      products: sorted,
       total,
-      limit: limit ? Number(limit) : null,
-      offset: offset ? Number(offset) : 0,
+      page: skip ? Math.floor(skip / (take || 20)) + 1 : 1,
+      pageSize: take || sorted.length,
     })
   } catch (error) {
     console.error("Error fetching products:", error)
-    return NextResponse.json(
-      { error: "Error fetching products" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error fetching products" }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const { response } = await requireAdmin()
+    if (response) {
+      return response
+    }
+
+    const body: ProductInput = await request.json()
+    const validationError = validateProductInput(body)
+
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 })
+    }
 
     const product = await prisma.product.create({
       data: {
@@ -108,26 +184,32 @@ export async function POST(request: NextRequest) {
         description: body.description,
         price: body.price,
         comparePrice: body.comparePrice,
-        stock: body.stock || 0,
         images: body.images || [],
-        specs: body.specs || {},
+        specs: {},
         isNew: body.isNew || false,
         isFeatured: body.isFeatured || false,
+        isActive: body.isActive ?? true,
         categoryId: body.categoryId,
         brandId: body.brandId,
+        variants: {
+          create: body.variants.map((variant) => ({
+            sku: variant.sku,
+            size: variant.size,
+            color: variant.color,
+            stock: variant.stock,
+          })),
+        },
       },
       include: {
         category: true,
         brand: true,
+        variants: true,
       },
     })
 
     return NextResponse.json(transformProduct(product), { status: 201 })
   } catch (error) {
     console.error("Error creating product:", error)
-    return NextResponse.json(
-      { error: "Error creating product" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error creating product" }, { status: 500 })
   }
 }

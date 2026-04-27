@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Package, Eye, Loader2 } from "lucide-react"
+import { Package, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -143,8 +143,8 @@ export default function OrdersPage() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-1 text-sm">
                       <p>
-                        <span className="text-muted-foreground">Envio: </span>
-                        {order.shippingAddress}
+                        <span className="text-muted-foreground">Envío: </span>
+                        {`${order.shippingAddress.address}, ${order.shippingAddress.district}`}
                       </p>
                       <p>
                         <span className="text-muted-foreground">Pago: </span>
@@ -169,7 +169,7 @@ export default function OrdersPage() {
                     <>
                       <Separator />
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Estado del envio</p>
+                        <p className="text-sm font-medium">Estado del envío</p>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                             <div

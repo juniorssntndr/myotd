@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+import "swiper/css"
+import "swiper/css/autoplay"
 import { ThemeProvider } from "@/components/providers/ThemeProvider"
 import { SessionProvider } from "@/components/providers/SessionProvider"
 
@@ -15,8 +17,16 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "BasicTechShop - Tu Tienda de Tecnologia",
-  description: "Los mejores productos de computacion: PCs, monitores, teclados, mouse y mas. Envio a todo Peru.",
+  title: "Myotd — Moda Urbana Multimarca Perú",
+  description: "Tu estilo, tu ciudad. Encuentra las mejores marcas de moda urbana en un solo lugar. Envíos a todo el Perú.",
+  openGraph: {
+    title: "Myotd — Moda Urbana Multimarca Perú",
+    description: "Tu estilo, tu ciudad. Encuentra las mejores marcas de moda urbana en un solo lugar.",
+    url: "https://myotd.pe",
+    siteName: "Myotd",
+    locale: "es_PE",
+    type: "website",
+  },
 }
 
 export default function RootLayout({

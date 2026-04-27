@@ -1,157 +1,80 @@
-# Listado de Paginas - BasicTechShop
+﻿# PAGES and API Map: Myotd
 
-## Paginas Publicas (Shop)
+## Public Pages
 
-| Ruta | Descripcion | Autenticacion |
-|------|-------------|---------------|
-| `/` | Homepage - Hero, categorias, productos destacados | No |
-| `/products` | Catalogo de productos con filtros | No |
-| `/products/[id]` | Detalle de producto | No |
-| `/cart` | Carrito de compras | No |
-| `/login` | Inicio de sesion | Solo invitados |
-| `/register` | Registro de usuario | Solo invitados |
+| Route | Description | Auth |
+|---|---|---|
+| `/` | Home with urban brand identity and featured drops | No |
+| `/products` | Catalog with filters (category, brand, size, color, price) | No |
+| `/products/[id]` | Product detail with variant selection | No |
+| `/cart` | Cart with variant-aware items | No |
+| `/checkout` | 3-step checkout and Culqi redirect | Yes |
+| `/login` | Login | Guest only |
+| `/register` | Register | Guest only |
 
-## Paginas de Checkout
+## Customer Account Pages
 
-| Ruta | Descripcion | Autenticacion |
-|------|-------------|---------------|
-| `/checkout` | Proceso de checkout | Si |
-| `/checkout/success` | Confirmacion de pago exitoso | Si |
-| `/checkout/cancel` | Pago cancelado | Si |
+| Route | Description | Auth |
+|---|---|---|
+| `/profile` | Profile summary | Yes |
+| `/profile/orders` | Order history | Yes |
+| `/profile/addresses` | Address management | Yes |
+| `/profile/addresses/new` | Create address | Yes |
+| `/profile/addresses/[id]/edit` | Edit address | Yes |
+| `/profile/favorites` | Favorites | Yes |
+| `/profile/settings` | Account settings | Yes |
 
-## Paginas de Perfil de Usuario
+## Admin Pages
 
-| Ruta | Descripcion | Autenticacion |
-|------|-------------|---------------|
-| `/profile` | Informacion del perfil y estadisticas | Si |
-| `/profile/orders` | Historial de pedidos | Si |
-| `/profile/addresses` | Lista de direcciones | Si |
-| `/profile/addresses/new` | Agregar nueva direccion | Si |
-| `/profile/addresses/[id]/edit` | Editar direccion | Si |
-| `/profile/favorites` | Productos favoritos | Si |
-| `/profile/settings` | Configuracion de cuenta | Si |
-
-## Paginas de Administracion
-
-| Ruta | Descripcion | Autenticacion |
-|------|-------------|---------------|
-| `/admin` | Dashboard con estadisticas | Admin |
-| `/admin/products` | Gestion de productos | Admin |
-| `/admin/products/new` | Crear nuevo producto | Admin |
-| `/admin/users` | Gestion de usuarios | Admin |
-| `/admin/users/new` | Crear nuevo usuario | Admin |
-| `/admin/payments` | Historial de pagos/ordenes | Admin |
-| `/admin/settings` | Configuracion del sistema | Admin |
-
----
+| Route | Description | Auth |
+|---|---|---|
+| `/admin` | Dashboard and KPIs | Admin |
+| `/admin/products` | Product list and status | Admin |
+| `/admin/products/new` | Create product with variants | Admin |
+| `/admin/products/[id]/edit` | Edit product + variants | Admin |
+| `/admin/users` | User management | Admin |
+| `/admin/payments` | Payment monitoring | Admin |
+| `/admin/settings` | Store settings | Admin |
 
 ## API Routes
 
-### Autenticacion
+### Auth
+| Method | Route | Description |
+|---|---|---|
+| GET/POST | `/api/auth/[...nextauth]` | Session and auth handlers |
+| POST | `/api/auth/register` | User registration |
 
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET/POST | `/api/auth/[...nextauth]` | NextAuth.js handlers |
-| POST | `/api/auth/register` | Registro de usuario |
+### Catalog and Product Admin
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/products` | List products with real filters |
+| POST | `/api/products` | Create product with variants |
+| GET | `/api/products/[id]` | Product by id/slug |
+| PUT | `/api/products/[id]` | Update product and variants |
+| DELETE | `/api/products/[id]` | Soft delete product (`isActive=false`) |
+| GET | `/api/categories` | Category list |
+| GET | `/api/brands` | Brand list |
 
-### Productos
+### Checkout and Payments
+| Method | Route | Description |
+|---|---|---|
+| POST | `/api/checkout` | Create order + Culqi checkout URL |
+| POST | `/api/webhook/culqi` | Culqi payment webhook |
+| POST | `/api/webhook/stripe` | Deprecated (410) |
 
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/products` | Listar productos (con filtros) |
-| POST | `/api/products` | Crear producto |
-| GET | `/api/products/[id]` | Obtener producto |
-| PUT | `/api/products/[id]` | Actualizar producto |
-| DELETE | `/api/products/[id]` | Eliminar producto |
+### Orders
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/orders` | Current user orders with variant data |
+| POST | `/api/orders` | Create order record |
+| GET | `/api/orders/[id]` | Order details with item variant fields |
+| PUT | `/api/orders/[id]` | Update order status/notes |
+| GET | `/api/admin/orders` | Admin order listing |
 
-### Categorias y Marcas
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/categories` | Listar categorias |
-| GET | `/api/brands` | Listar marcas |
-
-### Ordenes
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/orders` | Listar ordenes del usuario |
-| POST | `/api/orders` | Crear orden |
-| GET | `/api/orders/[id]` | Obtener orden |
-
-### Direcciones
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/addresses` | Listar direcciones del usuario |
-| POST | `/api/addresses` | Crear direccion |
-| GET | `/api/addresses/[id]` | Obtener direccion |
-| PUT | `/api/addresses/[id]` | Actualizar direccion |
-| DELETE | `/api/addresses/[id]` | Eliminar direccion |
-
-### Usuarios
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/users` | Listar usuarios (admin) |
-| POST | `/api/users` | Crear usuario (admin) |
-
-### Admin
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/admin/dashboard` | Estadisticas del dashboard |
-| GET | `/api/admin/orders` | Listar todas las ordenes |
-
-### Pagos (Stripe)
-
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| POST | `/api/checkout` | Crear sesion de Stripe Checkout |
-| POST | `/api/webhook/stripe` | Webhook de Stripe |
-
----
-
-## Estructura de Layouts
-
-```
-src/app/
-├── layout.tsx                    # Root layout (ThemeProvider, SessionProvider)
-├── (shop)/                       # Grupo de rutas publicas
-│   ├── layout.tsx               # Layout con TopBar, Header, Footer
-│   ├── page.tsx                 # Homepage
-│   ├── products/
-│   ├── cart/
-│   ├── checkout/
-│   ├── profile/
-│   │   └── layout.tsx           # Layout con sidebar de perfil
-│   ├── login/
-│   └── register/
-└── (admin-panel)/               # Grupo de rutas admin
-    └── admin/
-        ├── layout.tsx           # Layout con AdminSidebar
-        ├── page.tsx             # Dashboard
-        ├── products/
-        ├── users/
-        ├── payments/
-        └── settings/
-```
-
-## Proteccion de Rutas (Middleware)
-
-- **Rutas protegidas** (`/profile/*`, `/checkout`): Requieren autenticacion
-- **Rutas admin** (`/admin/*`): Requieren rol ADMIN
-- **Rutas de invitados** (`/login`, `/register`): Solo accesibles sin autenticacion
-
----
-
-## Resumen
-
-| Categoria | Cantidad |
-|-----------|----------|
-| Paginas Publicas | 6 |
-| Paginas Checkout | 3 |
-| Paginas Perfil | 7 |
-| Paginas Admin | 7 |
-| **Total Paginas** | **23** |
-| API Routes | 15 |
+### User and Addresses
+| Method | Route | Description |
+|---|---|---|
+| GET/POST | `/api/addresses` | User addresses |
+| GET/PUT/DELETE | `/api/addresses/[id]` | Address detail/update/delete |
+| GET/POST | `/api/users` | Admin users operations |
+| GET | `/api/admin/dashboard` | Admin dashboard summary |

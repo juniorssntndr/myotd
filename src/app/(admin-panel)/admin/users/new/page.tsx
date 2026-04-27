@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -23,7 +23,7 @@ const userSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   email: z.string().email("Email invalido"),
   phone: z.string().optional(),
-  password: z.string().min(6, "La contrasena debe tener al menos 6 caracteres"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   role: z.enum(["customer", "admin"]),
 })
 
@@ -82,7 +82,7 @@ export default function NewUserPage() {
 
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>Informacion del Usuario</CardTitle>
+          <CardTitle>Información del Usuario</CardTitle>
           <CardDescription>
             Completa los datos para crear el nuevo usuario
           </CardDescription>
@@ -102,7 +102,7 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electronico</Label>
+              <Label htmlFor="email">Correo electrónico</Label>
               <Input
                 id="email"
                 type="email"
@@ -115,7 +115,7 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono (opcional)</Label>
+              <Label htmlFor="phone">Teléfono (opcional)</Label>
               <Input
                 id="phone"
                 placeholder="+51 999 888 777"
@@ -143,7 +143,7 @@ export default function NewUserPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contrasena</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"

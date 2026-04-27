@@ -13,11 +13,27 @@ interface Address {
 }
 
 interface OrderItem {
+  id: string
   productId: string
+  variantId?: string
   name: string
+  brand: string
+  sku?: string
+  size: string
+  color: string
   price: number
   quantity: number
   image: string
+  total: number
+}
+
+interface ShippingAddress {
+  name: string
+  phone: string
+  address: string
+  city: string
+  district: string
+  zipCode: string
 }
 
 interface Order {
@@ -28,9 +44,10 @@ interface Order {
   shipping: number
   total: number
   paymentMethod: string
-  shippingAddress: string
+  shippingAddress: ShippingAddress
   items: OrderItem[]
   createdAt: string
+  updatedAt?: string
 }
 
 interface UserProfile {
@@ -67,7 +84,7 @@ interface UserState {
   deleteAddress: (id: string) => Promise<void>
 }
 
-export const useUserStore = create<UserState>((set, get) => ({
+export const useUserStore = create<UserState>((set) => ({
   profile: null,
   addresses: [],
   orders: [],

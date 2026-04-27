@@ -3,11 +3,13 @@ import type {
   Product as PrismaProduct,
   Category as PrismaCategory,
   Brand as PrismaBrand,
-} from "@prisma/client"
+  ProductVariant,
+} from "@/generated/client"
 
 type ProductWithRelations = PrismaProduct & {
   category: PrismaCategory
   brand: PrismaBrand
+  variants?: ProductVariant[]
 }
 
 type CategoryWithCount = PrismaCategory & {
@@ -19,21 +21,40 @@ type BrandWithCount = PrismaBrand & {
 }
 
 export function transformProduct(product: ProductWithRelations): Product {
+  const sizes = [...new Set(product.variants?.map((v) => v.size) || [])]
+  const colors = [...new Set(product.variants?.map((v) => v.color) || [])]
+  const specs = (product.specs as Record<string, unknown> | null) || {}
+  const shortDescription =
+    typeof specs.shortDescription === "string" ? specs.shortDescription : ""
+
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
     brand: product.brand.name,
+    brandId: product.brandId,
     category: product.category.slug,
+    categoryId: product.categoryId,
     price: Number(product.price),
     originalPrice: product.comparePrice ? Number(product.comparePrice) : undefined,
     images: product.images,
+    shortDescription,
     description: product.description || "",
-    specs: (product.specs as Record<string, string>) || {},
-    stock: product.stock,
+    variants: product.variants?.map((v) => ({
+      id: v.id,
+      sku: v.sku,
+      size: v.size,
+      color: v.color,
+      stock: v.stock,
+    })) || [],
+    sizes,
+    colors,
     isNew: product.isNew,
     isFeatured: product.isFeatured,
-    rating: 4.5, // Default rating - could be calculated from reviews in the future
+    isActive: product.isActive,
+    rating: 4.5,
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
   }
 }
 
@@ -51,6 +72,7 @@ export function transformBrand(brand: BrandWithCount): Brand {
   return {
     id: brand.id,
     name: brand.name,
+    slug: brand.slug,
     logo: brand.logo || undefined,
     productCount: brand._count?.products || 0,
   }

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   Menu,
@@ -27,7 +28,7 @@ const navigation = [
   { name: "Productos", href: "/admin/products", icon: Package },
   { name: "Pagos", href: "/admin/payments", icon: CreditCard },
   { name: "Usuarios", href: "/admin/users", icon: Users },
-  { name: "Configuracion", href: "/admin/settings", icon: Settings },
+  { name: "Configuración", href: "/admin/settings", icon: Settings },
 ]
 
 export function AdminMobileNav() {
@@ -45,9 +46,7 @@ export function AdminMobileNav() {
       <SheetContent side="left" className="w-64 p-0">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">BT</span>
-            </div>
+            <Image src="/myotd-logo.png" alt="Myotd" width={130} height={46} className="h-9 w-auto" />
             Admin Panel
           </SheetTitle>
         </SheetHeader>

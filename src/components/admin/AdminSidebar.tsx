@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
@@ -8,7 +9,6 @@ import {
   CreditCard,
   Users,
   Settings,
-  ChevronLeft,
   Store,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -16,10 +16,10 @@ import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Productos", href: "/admin/products", icon: Package },
+  { name: "Catálogo", href: "/admin/products", icon: Package },
   { name: "Pagos", href: "/admin/payments", icon: CreditCard },
   { name: "Usuarios", href: "/admin/users", icon: Users },
-  { name: "Configuracion", href: "/admin/settings", icon: Settings },
+  { name: "Configuración", href: "/admin/settings", icon: Settings },
 ]
 
 export function AdminSidebar() {
@@ -29,9 +29,7 @@ export function AdminSidebar() {
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r bg-card">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <span className="text-sm font-bold text-primary-foreground">BT</span>
-        </div>
+        <Image src="/myotd-logo.png" alt="Myotd" width={130} height={46} className="h-9 w-auto shrink-0" />
         <span className="font-bold">Admin Panel</span>
       </div>
 

@@ -1,10 +1,10 @@
-# BasicTechShop
+# Myotd
 
-E-commerce de productos de computación construido con Next.js 16, TypeScript y Tailwind CSS.
+E-commerce multimarca de moda urbana para Perú construido con Next.js 16, TypeScript y Tailwind CSS.
 
 ## Descripción
 
-BasicTechShop es una tienda online especializada en hardware, periféricos y componentes de computación. Incluye:
+Myotd es una tienda online especializada en moda urbana multimarca. Incluye:
 
 - **Tienda pública**: Catálogo con filtros, carrito y checkout
 - **Panel de usuario**: Perfil, historial de pedidos y direcciones
@@ -34,7 +34,7 @@ BasicTechShop es una tienda online especializada en hardware, periféricos y com
 ```bash
 # Clonar repositorio
 git clone <repo-url>
-cd ecommerce-basictech
+cd myotd
 
 # Instalar dependencias
 npm install

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Myotd — Moda Urbana Multimarca Perú",
     description: "Tu estilo, tu ciudad. Encuentra las mejores marcas de moda urbana en un solo lugar.",
-    url: "https://myotd.pe",
+    url: "https://myotd.shop",
     siteName: "Myotd",
     locale: "es_PE",
     type: "website",

@@ -24,4 +24,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Startup: push schema to DB (creates tables if missing), then start app
-CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npm run start"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm run start"]

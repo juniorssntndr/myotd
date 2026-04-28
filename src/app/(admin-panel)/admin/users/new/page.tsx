@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -56,9 +57,11 @@ export default function NewUserPage() {
 
       if (!response.ok) throw new Error("Error creating user")
 
+      toast.success("Usuario creado correctamente")
       router.push("/admin/users")
     } catch (error) {
       console.error("Error creating user:", error)
+      toast.error("No se pudo crear el usuario")
     } finally {
       setSaving(false)
     }

@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: myotd123
       POSTGRES_DB: myotd
     ports:
-      - "5490:5432"
+      - "6040:5432"
     volumes:
       - myotd_postgres_data:/var/lib/postgresql/data
     healthcheck:

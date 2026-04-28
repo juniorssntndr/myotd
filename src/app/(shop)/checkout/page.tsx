@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Check, Loader2, AlertCircle, ShoppingBag } from "lucide-react"
+import { ChevronLeft, Check, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"

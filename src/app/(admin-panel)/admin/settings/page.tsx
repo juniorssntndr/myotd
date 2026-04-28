@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { LucideIcon } from "lucide-react"
-import { BellRing, CreditCard, Globe2, Loader2, Save, SlidersHorizontal, Store } from "lucide-react"
+import { ArrowRight, BellRing, CreditCard, Globe2, Loader2, Save, SlidersHorizontal, Store } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -206,6 +208,7 @@ export default function AdminSettingsPage() {
     notifications,
     paymentMethods,
     loading,
+    fetchSettings,
     saveSettings,
     updateGeneral,
     updateSocialLinks,
@@ -215,6 +218,11 @@ export default function AdminSettingsPage() {
   } = useSettingsStore()
 
   const [saving, setSaving] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    void fetchSettings()
+  }, [fetchSettings])
 
   const generalForm = useForm<GeneralForm>({
     resolver: zodResolver(generalSchema),
@@ -236,6 +244,7 @@ export default function AdminSettingsPage() {
     if (!silent) setSaving(true)
     try {
       await saveSettings()
+      router.refresh()
       if (!silent) toast.success("Configuración guardada correctamente")
     } catch {
       if (!silent) toast.error("Error al guardar la configuración")
@@ -304,6 +313,27 @@ export default function AdminSettingsPage() {
         enabledPayments={enabledPayments}
         activeSocialLinks={activeSocialLinks}
       />
+
+      <Card className="border-border/60 bg-card/95 shadow-sm">
+        <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between lg:p-5">
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              Storefront separado
+            </p>
+            <h2 className="text-lg font-semibold tracking-tight">Home visual ahora vive en su propio apartado</h2>
+            <p className="text-sm text-muted-foreground">
+              Hero, marcas y ofertas salieron de Configuración para no mezclar storefront con ajustes
+              operativos.
+            </p>
+          </div>
+          <Button asChild className="justify-between">
+            <Link href="/admin/home">
+              Abrir Home visual
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="general" className="space-y-4">
         <Card className="border-border/60 bg-card/95 shadow-sm">
@@ -423,7 +453,7 @@ export default function AdminSettingsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <Label>Zona horaria</Label>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue />
@@ -444,7 +474,7 @@ export default function AdminSettingsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <Label>Moneda</Label>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue />

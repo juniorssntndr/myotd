@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { transformProduct } from "@/lib/transformers"
 import { requireAdmin } from "@/lib/api-auth"
+import { normalizeProductImageList } from "@/lib/image-url"
 
 type ProductVariantInput = {
   id?: string
@@ -184,7 +185,7 @@ export async function POST(request: NextRequest) {
         description: body.description,
         price: body.price,
         comparePrice: body.comparePrice,
-        images: body.images || [],
+        images: normalizeProductImageList(body.images),
         specs: {},
         isNew: body.isNew || false,
         isFeatured: body.isFeatured || false,

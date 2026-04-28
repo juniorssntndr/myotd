@@ -214,7 +214,7 @@ export const products: Product[] = [
     category: "hoodies",
     price: 299.9,
     images: [
-      "https://images.unsplash.com/photo-1620799140188-3b2a02fd87a8?w=900&h=900&fit=crop",
+      "https://images.unsplash.com/photo-1578681994506-b8f463449011?w=900&h=900&fit=crop",
       "https://images.unsplash.com/photo-1578681994506-b8f463449011?w=900&h=900&fit=crop",
     ],
     shortDescription: "Buzo con capucha, interior suave y look deportivo clásico.",
@@ -371,7 +371,7 @@ export const products: Product[] = [
     category: "accesorios",
     price: 159.9,
     images: [
-      "https://images.unsplash.com/photo-1553062406-0b2dc83a5d32?w=900&h=900&fit=crop",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=900&h=900&fit=crop",
       "https://images.unsplash.com/photo-1572460557107-feca83eb3bc7?w=900&h=900&fit=crop",
     ],
     shortDescription: "Crossbody compacta de nylon con estética funcional y minimal.",

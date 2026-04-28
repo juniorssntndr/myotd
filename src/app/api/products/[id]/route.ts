@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { transformProduct } from "@/lib/transformers"
 import { requireAdmin } from "@/lib/api-auth"
+import { normalizeProductImageList } from "@/lib/image-url"
 
 type Params = Promise<{ id: string }>
 
@@ -95,7 +96,7 @@ export async function PUT(
           ...(body.description !== undefined ? { description: body.description } : {}),
           ...(body.price !== undefined ? { price: body.price } : {}),
           ...(body.comparePrice !== undefined ? { comparePrice: body.comparePrice } : {}),
-          ...(body.images !== undefined ? { images: body.images } : {}),
+          ...(body.images !== undefined ? { images: normalizeProductImageList(body.images) } : {}),
           ...(body.isNew !== undefined ? { isNew: body.isNew } : {}),
           ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
           ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
@@ -183,9 +184,11 @@ export async function PUT(
     }
 
     return NextResponse.json(transformProduct(hydrated))
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating product:", error)
-    return NextResponse.json({ error: error.message || "Error updating product" }, { status: 500 })
+    const message =
+      error instanceof Error ? error.message : "Error updating product"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 

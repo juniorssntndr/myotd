@@ -1353,6 +1353,7 @@ export const StoreSettingsScalarFieldEnum = {
   payTransfer: 'payTransfer',
   payWallet: 'payWallet',
   payCashOnDelivery: 'payCashOnDelivery',
+  homeVisual: 'homeVisual',
   updatedAt: 'updatedAt'
 } as const
 

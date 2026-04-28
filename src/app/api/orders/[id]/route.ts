@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/api-auth"
+import { resolveProductImageUrl } from "@/lib/image-url"
 
 type Params = Promise<{ id: string }>
 type OrderStatus = "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"
@@ -93,7 +94,7 @@ export async function GET(
         price: Number(item.price),
         quantity: item.quantity,
         total: Number(item.total),
-        image: item.product.images[0] || "",
+        image: resolveProductImageUrl(item.product.images[0] || ""),
       })),
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),

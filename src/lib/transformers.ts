@@ -5,6 +5,7 @@ import type {
   Brand as PrismaBrand,
   ProductVariant,
 } from "@/generated/client"
+import { resolveProductImageList } from "@/lib/image-url"
 
 type ProductWithRelations = PrismaProduct & {
   category: PrismaCategory
@@ -37,7 +38,7 @@ export function transformProduct(product: ProductWithRelations): Product {
     categoryId: product.categoryId,
     price: Number(product.price),
     originalPrice: product.comparePrice ? Number(product.comparePrice) : undefined,
-    images: product.images,
+    images: resolveProductImageList(product.images),
     shortDescription,
     description: product.description || "",
     variants: product.variants?.map((v) => ({

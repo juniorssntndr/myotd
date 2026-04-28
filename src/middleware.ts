@@ -1,7 +1,9 @@
-import { auth } from "@/lib/auth"
+import NextAuth from "next-auth"
+import { authConfig } from "@/lib/auth.config"
 import { NextResponse } from "next/server"
 
-export const runtime = "nodejs"
+// Usamos NextAuth con el config Edge-safe (sin Prisma, sin bcrypt)
+const { auth } = NextAuth(authConfig)
 
 // Routes that require authentication
 const protectedRoutes = ["/profile", "/checkout"]

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart, Star, Check } from "lucide-react"
+import { ShoppingCart, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,6 +27,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
     : 0
 
   const productImage = product.images?.[0] || PLACEHOLDER_IMAGE
+  const secondaryImage = product.images?.[1] || null
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0)
   const isOutOfStock = totalStock === 0
@@ -72,8 +73,23 @@ export function ProductListItem({ product }: ProductListItemProps) {
               className="object-cover mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, 200px"
             />
+            {secondaryImage ? (
+              <Image
+                src={secondaryImage}
+                alt={`${product.name} imagen secundaria`}
+                fill
+                className="object-cover opacity-0 transition-opacity duration-300 md:group-hover:opacity-100"
+                sizes="(max-width: 640px) 100vw, 200px"
+              />
+            ) : null}
           </div>
         </Link>
+
+        {product.images.length > 1 ? (
+          <span className="absolute bottom-2 left-2 z-10 rounded-full bg-background/85 px-2 py-1 text-[11px] font-medium text-foreground">
+            {product.images.length} fotos
+          </span>
+        ) : null}
       </div>
 
       <CardContent className="flex flex-1 flex-col p-0 justify-between">
@@ -87,10 +103,11 @@ export function ProductListItem({ product }: ProductListItemProps) {
                 </h3>
               </Link>
             </div>
-            <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md">
-              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">{product.rating}</span>
-            </div>
+            {product.images.length > 1 ? (
+              <div className="rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                Hover para ver más
+              </div>
+            ) : null}
           </div>
 
           <p className="mt-4 text-sm text-muted-foreground line-clamp-2">

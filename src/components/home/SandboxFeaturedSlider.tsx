@@ -26,7 +26,6 @@ export type SandboxFeaturedItem = {
 
 type SandboxFeaturedSliderProps = {
   items?: SandboxFeaturedItem[]
-  slidesPerView?: number
   spaceBetween?: number
   autoplayDelay?: number
 }
@@ -86,7 +85,6 @@ const DEFAULT_ITEMS: SandboxFeaturedItem[] = [
 
 export function SandboxFeaturedSlider({
   items = DEFAULT_ITEMS,
-  slidesPerView = 3,
   spaceBetween = 30,
   autoplayDelay = 3000,
 }: SandboxFeaturedSliderProps) {

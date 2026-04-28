@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { products as mockProducts } from "@/data/mock-products"
 import { SandboxFeaturedOffersCarousel } from "@/components/home/SandboxFeaturedOffersCarousel"
+import { resolveProductImageUrl } from "@/lib/image-url"
 
 export type FeaturedOfferCard = {
   id: string
@@ -159,7 +160,7 @@ async function getOfferCards(): Promise<FeaturedOfferCard[]> {
     const dbOffers = buildOffers(
       products.map((product) => ({
         id: product.id,
-        image: product.images[0] ?? "",
+        image: resolveProductImageUrl(product.images[0] ?? ""),
         brandName: product.brand.name,
         categoryName: product.category.name,
         categorySlug: product.category.slug,

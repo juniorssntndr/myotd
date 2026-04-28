@@ -8,7 +8,12 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL no está configurada en el proceso de Next.js")
+  }
+
+  const pool = globalForPrisma.pool ?? new Pool({ connectionString: process.env.DATABASE_URL })
+  globalForPrisma.pool = pool
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }

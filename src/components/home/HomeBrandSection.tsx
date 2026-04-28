@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { brands as mockBrands, products as mockProducts } from "@/data/mock-products"
 import { HomeSponsoredCarousel, type HomeSponsoredItem } from "@/components/home/HomeSponsoredCarousel"
+import { resolveProductImageUrl, sanitizeImageUrl } from "@/lib/image-url"
+import { type HomeBrandsVisual, defaultHomeVisual } from "@/lib/home-visual"
 
 function formatCategoryName(value: string) {
   return value
@@ -60,8 +62,9 @@ async function getSponsoredItems() {
       seenBrands.add(product.brand.id)
       items.push({
         id: product.id,
+        brandSlug: product.brand.slug,
         href: `/products?brand=${product.brand.slug}`,
-        image: product.images[0],
+        image: resolveProductImageUrl(product.images[0]),
         logo: product.brand.logo,
         brandName: product.brand.name,
         categoryName: product.category.name,
@@ -87,8 +90,9 @@ async function getSponsoredItems() {
     seenBrands.add(brand.id)
     items.push({
       id: product.id,
+      brandSlug: brand.slug,
       href: `/products?brand=${brand.slug}`,
-      image: product.images[0],
+      image: sanitizeImageUrl(product.images[0]),
       logo: brand.logo,
       brandName: brand.name,
       categoryName: formatCategoryName(product.category),
@@ -104,25 +108,52 @@ async function getSponsoredItems() {
   return items
 }
 
-export async function HomeBrandSection() {
-  const items = await getSponsoredItems()
+type HomeBrandSectionProps = {
+  visual?: HomeBrandsVisual
+}
+
+export async function HomeBrandSection({
+  visual = defaultHomeVisual.brands,
+}: HomeBrandSectionProps) {
+  const rawItems = await getSponsoredItems()
+  const items = rawItems.map((item) => {
+    const override = visual.brandOverrides[item.brandSlug]
+    if (!override) {
+      return item
+    }
+
+    const displayName = override.displayName?.trim()
+    const heroImage = override.heroImage?.trim()
+    const logoUrl = override.logoUrl?.trim()
+
+    return {
+      ...item,
+      brandName: displayName || item.brandName,
+      image: heroImage || item.image,
+      logo: logoUrl || item.logo,
+    }
+  })
 
   return (
     <section className="border-t bg-background py-12 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-            Las mejores marcas para ti
+            {visual.title}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
-            Nike, Adidas, Converse, Puma y más en un solo lugar
+            {visual.subtitle}
           </p>
         </div>
 
         {items.length === 0 ? (
           <p className="text-center text-muted-foreground">Próximamente nuevas marcas</p>
         ) : (
-          <HomeSponsoredCarousel items={items} />
+          <HomeSponsoredCarousel
+            items={items}
+            imageOverlayOpacity={visual.imageOverlayOpacity}
+            showStoreBadgeEnabled={visual.showStoreBadge}
+          />
         )}
       </div>
     </section>

@@ -192,6 +192,7 @@ model StoreSettings {
   payTransfer           Boolean  @default(true)
   payWallet             Boolean  @default(true)
   payCashOnDelivery     Boolean  @default(true)
+  homeVisual            Json?
   updatedAt             DateTime @updatedAt
 
   @@map("store_settings")

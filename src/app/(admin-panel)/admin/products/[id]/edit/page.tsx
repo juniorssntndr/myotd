@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { ProductImageManager } from "@/components/admin/ProductImageManager"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -65,9 +66,6 @@ export default function EditProductPage() {
     const fetchData = async () => {
       setLoading(true)
       await Promise.all([fetchCategories(), fetchBrands()])
-
-      const currentCategories = useCategoriesStore.getState().categories
-      const currentBrands = useBrandsStore.getState().brands
 
       try {
         const response = await fetch(`/api/products/${params.id}`)
@@ -232,6 +230,11 @@ export default function EditProductPage() {
       return
     }
 
+    if (product.images.filter((image) => image.trim().length > 0).length === 0) {
+      toast.error("Debes registrar al menos una imagen")
+      return
+    }
+
     setSaving(true)
     try {
       const variantsWithSku = product.variants.map((v) => ({
@@ -263,9 +266,12 @@ export default function EditProductPage() {
         throw new Error(errorData.error || errorData.details || "Error updating product")
       }
 
+      toast.success("Cambios guardados correctamente")
       router.push("/admin/products")
-    } catch (error: any) {
-      toast.error(error.message || "No se pudo actualizar el producto")
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "No se pudo actualizar el producto"
+      )
     } finally {
       setSaving(false)
     }
@@ -439,6 +445,22 @@ export default function EditProductPage() {
               <Plus className="mr-2 h-4 w-4" />
               Agregar variante
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Imágenes</CardTitle>
+            <CardDescription>
+              Pega URLs completas o paths de Imgix. La primera imagen se usa como portada del catálogo.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProductImageManager
+              value={product.images}
+              onChange={(images) => updateProductField("images", images)}
+              maxImages={5}
+            />
           </CardContent>
         </Card>
 

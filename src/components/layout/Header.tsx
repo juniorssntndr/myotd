@@ -21,12 +21,16 @@ import { MobileNav } from "./MobileNav"
 import { useCartStore } from "@/stores/cart-store"
 import { useFavoritesStore } from "@/stores/favorites-store"
 
-export function Header() {
-  const mounted = useSyncExternalStore(
+function useIsClient() {
+  return useSyncExternalStore(
     () => () => {},
     () => true,
     () => false
   )
+}
+
+export function Header() {
+  const mounted = useIsClient()
   const itemCount = useCartStore((state) => state.getItemCount())
   const favoritesCount = useFavoritesStore((state) => state.favorites.length)
   const favoritesHydrated = useFavoritesStore((state) => state.hydrated)

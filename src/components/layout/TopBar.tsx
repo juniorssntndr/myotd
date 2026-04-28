@@ -5,10 +5,11 @@ export function TopBar() {
     <div className="bg-[#E11D48] text-white">
       <div className="container mx-auto px-4">
         <div className="flex h-9 items-center justify-between text-xs">
-          <div className="flex items-center gap-1">
-            <span className="hidden sm:inline">Envío gratis en pedidos desde</span>
-            <span className="font-semibold">S/ 200</span>
-            <span className="hidden sm:inline">• hasta 40% OFF</span>
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs truncate">
+            <span className="sm:hidden font-medium">Envío gratis desde S/ 200</span>
+            <span className="hidden sm:inline">
+              Envío gratis en pedidos desde <span className="font-semibold">S/ 200</span> • hasta 40% OFF
+            </span>
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-1.5">

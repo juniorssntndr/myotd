@@ -123,6 +123,7 @@ export type StoreSettingsCountAggregateOutputType = {
   payTransfer: number
   payWallet: number
   payCashOnDelivery: number
+  homeVisual: number
   updatedAt: number
   _all: number
 }
@@ -225,6 +226,7 @@ export type StoreSettingsCountAggregateInputType = {
   payTransfer?: true
   payWallet?: true
   payCashOnDelivery?: true
+  homeVisual?: true
   updatedAt?: true
   _all?: true
 }
@@ -342,6 +344,7 @@ export type StoreSettingsGroupByOutputType = {
   payTransfer: boolean
   payWallet: boolean
   payCashOnDelivery: boolean
+  homeVisual: runtime.JsonValue | null
   updatedAt: Date
   _count: StoreSettingsCountAggregateOutputType | null
   _avg: StoreSettingsAvgAggregateOutputType | null
@@ -395,6 +398,7 @@ export type StoreSettingsWhereInput = {
   payTransfer?: Prisma.BoolFilter<"StoreSettings"> | boolean
   payWallet?: Prisma.BoolFilter<"StoreSettings"> | boolean
   payCashOnDelivery?: Prisma.BoolFilter<"StoreSettings"> | boolean
+  homeVisual?: Prisma.JsonNullableFilter<"StoreSettings">
   updatedAt?: Prisma.DateTimeFilter<"StoreSettings"> | Date | string
 }
 
@@ -425,6 +429,7 @@ export type StoreSettingsOrderByWithRelationInput = {
   payTransfer?: Prisma.SortOrder
   payWallet?: Prisma.SortOrder
   payCashOnDelivery?: Prisma.SortOrder
+  homeVisual?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -458,6 +463,7 @@ export type StoreSettingsWhereUniqueInput = Prisma.AtLeast<{
   payTransfer?: Prisma.BoolFilter<"StoreSettings"> | boolean
   payWallet?: Prisma.BoolFilter<"StoreSettings"> | boolean
   payCashOnDelivery?: Prisma.BoolFilter<"StoreSettings"> | boolean
+  homeVisual?: Prisma.JsonNullableFilter<"StoreSettings">
   updatedAt?: Prisma.DateTimeFilter<"StoreSettings"> | Date | string
 }, "id">
 
@@ -488,6 +494,7 @@ export type StoreSettingsOrderByWithAggregationInput = {
   payTransfer?: Prisma.SortOrder
   payWallet?: Prisma.SortOrder
   payCashOnDelivery?: Prisma.SortOrder
+  homeVisual?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.StoreSettingsCountOrderByAggregateInput
   _avg?: Prisma.StoreSettingsAvgOrderByAggregateInput
@@ -526,6 +533,7 @@ export type StoreSettingsScalarWhereWithAggregatesInput = {
   payTransfer?: Prisma.BoolWithAggregatesFilter<"StoreSettings"> | boolean
   payWallet?: Prisma.BoolWithAggregatesFilter<"StoreSettings"> | boolean
   payCashOnDelivery?: Prisma.BoolWithAggregatesFilter<"StoreSettings"> | boolean
+  homeVisual?: Prisma.JsonNullableWithAggregatesFilter<"StoreSettings">
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StoreSettings"> | Date | string
 }
 
@@ -556,6 +564,7 @@ export type StoreSettingsCreateInput = {
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Date | string
 }
 
@@ -586,6 +595,7 @@ export type StoreSettingsUncheckedCreateInput = {
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Date | string
 }
 
@@ -616,6 +626,7 @@ export type StoreSettingsUpdateInput = {
   payTransfer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payWallet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payCashOnDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -646,6 +657,7 @@ export type StoreSettingsUncheckedUpdateInput = {
   payTransfer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payWallet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payCashOnDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -676,6 +688,7 @@ export type StoreSettingsCreateManyInput = {
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Date | string
 }
 
@@ -706,6 +719,7 @@ export type StoreSettingsUpdateManyMutationInput = {
   payTransfer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payWallet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payCashOnDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -736,6 +750,7 @@ export type StoreSettingsUncheckedUpdateManyInput = {
   payTransfer?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payWallet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   payCashOnDelivery?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  homeVisual?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -766,6 +781,7 @@ export type StoreSettingsCountOrderByAggregateInput = {
   payTransfer?: Prisma.SortOrder
   payWallet?: Prisma.SortOrder
   payCashOnDelivery?: Prisma.SortOrder
+  homeVisual?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -868,6 +884,7 @@ export type StoreSettingsSelect<ExtArgs extends runtime.Types.Extensions.Interna
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["storeSettings"]>
 
@@ -898,6 +915,7 @@ export type StoreSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["storeSettings"]>
 
@@ -928,6 +946,7 @@ export type StoreSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["storeSettings"]>
 
@@ -958,10 +977,11 @@ export type StoreSettingsSelectScalar = {
   payTransfer?: boolean
   payWallet?: boolean
   payCashOnDelivery?: boolean
+  homeVisual?: boolean
   updatedAt?: boolean
 }
 
-export type StoreSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeName" | "storeEmail" | "storePhone" | "storeAddress" | "storeDescription" | "timezone" | "currency" | "showOutOfStock" | "showStockQuantity" | "allowReviews" | "standardShippingCost" | "freeShippingThreshold" | "facebook" | "twitter" | "instagram" | "youtube" | "tiktok" | "notifyNewOrders" | "notifyFailedPayments" | "notifyLowStock" | "notifyNewUsers" | "payCard" | "payTransfer" | "payWallet" | "payCashOnDelivery" | "updatedAt", ExtArgs["result"]["storeSettings"]>
+export type StoreSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeName" | "storeEmail" | "storePhone" | "storeAddress" | "storeDescription" | "timezone" | "currency" | "showOutOfStock" | "showStockQuantity" | "allowReviews" | "standardShippingCost" | "freeShippingThreshold" | "facebook" | "twitter" | "instagram" | "youtube" | "tiktok" | "notifyNewOrders" | "notifyFailedPayments" | "notifyLowStock" | "notifyNewUsers" | "payCard" | "payTransfer" | "payWallet" | "payCashOnDelivery" | "homeVisual" | "updatedAt", ExtArgs["result"]["storeSettings"]>
 
 export type $StoreSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StoreSettings"
@@ -993,6 +1013,7 @@ export type $StoreSettingsPayload<ExtArgs extends runtime.Types.Extensions.Inter
     payTransfer: boolean
     payWallet: boolean
     payCashOnDelivery: boolean
+    homeVisual: runtime.JsonValue | null
     updatedAt: Date
   }, ExtArgs["result"]["storeSettings"]>
   composites: {}
@@ -1443,6 +1464,7 @@ export interface StoreSettingsFieldRefs {
   readonly payTransfer: Prisma.FieldRef<"StoreSettings", 'Boolean'>
   readonly payWallet: Prisma.FieldRef<"StoreSettings", 'Boolean'>
   readonly payCashOnDelivery: Prisma.FieldRef<"StoreSettings", 'Boolean'>
+  readonly homeVisual: Prisma.FieldRef<"StoreSettings", 'Json'>
   readonly updatedAt: Prisma.FieldRef<"StoreSettings", 'DateTime'>
 }
     

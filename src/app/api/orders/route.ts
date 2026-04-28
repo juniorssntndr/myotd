@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/api-auth"
+import { resolveProductImageUrl } from "@/lib/image-url"
 
 export async function GET() {
   try {
@@ -65,7 +66,7 @@ export async function GET() {
         sku: item.variant?.sku || "",
         price: Number(item.price),
         quantity: item.quantity,
-        image: item.product.images[0] || "",
+        image: resolveProductImageUrl(item.product.images[0] || ""),
         total: Number(item.total),
       })),
     }))

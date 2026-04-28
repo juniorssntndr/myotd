@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProductImageManager } from "@/components/admin/ProductImageManager"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -21,15 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ImageUpload } from "@/components/admin/ImageUpload"
 import { InlineCreateDialog, InlineCreateButton } from "@/components/admin/InlineCreateDialog"
 import { useCategoriesStore } from "@/stores/categories-store"
 import { useBrandsStore } from "@/stores/brands-store"
-
-interface UploadedImage {
-  url: string
-  publicId: string
-}
 
 interface ProductVariantInput {
   id?: string
@@ -60,11 +55,11 @@ const EMPTY_VARIANT: ProductVariantInput = {
 
 export default function NewProductPage() {
   const router = useRouter()
-  const { categories, addCategory, fetchCategories, loading: categoriesLoading } = useCategoriesStore()
-  const { brands, addBrand, fetchBrands, loading: brandsLoading } = useBrandsStore()
+  const { categories, addCategory, fetchCategories } = useCategoriesStore()
+  const { brands, addBrand, fetchBrands } = useBrandsStore()
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [images, setImages] = useState<UploadedImage[]>([])
+  const [images, setImages] = useState<string[]>([])
   const [variants, setVariants] = useState<ProductVariantInput[]>([{ ...EMPTY_VARIANT }])
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [brandDialogOpen, setBrandDialogOpen] = useState(false)
@@ -173,7 +168,7 @@ export default function NewProductPage() {
   }
 
   const onSubmit = async (data: ProductFormData) => {
-    if (images.length === 0) {
+    if (images.filter((image) => image.trim().length > 0).length === 0) {
       toast.error("Debes subir al menos una imagen")
       return
     }
@@ -206,7 +201,7 @@ export default function NewProductPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          images: images.map((image) => image.url),
+          images,
           variants: variantsWithSku,
           isActive: true,
         }),
@@ -216,6 +211,7 @@ export default function NewProductPage() {
         throw new Error("Error creating product")
       }
 
+      toast.success("Producto guardado correctamente")
       router.push("/admin/products")
     } catch (error) {
       console.error("Error creating product:", error)
@@ -414,10 +410,12 @@ export default function NewProductPage() {
         <Card>
           <CardHeader>
             <CardTitle>Imágenes</CardTitle>
-            <CardDescription>Sube las imágenes del producto (máximo 5)</CardDescription>
+            <CardDescription>
+              Pega URLs completas o paths de Imgix. La primera imagen será la portada del catálogo.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ImageUpload value={images} onChange={setImages} maxImages={5} />
+            <ProductImageManager value={images} onChange={setImages} maxImages={5} />
           </CardContent>
         </Card>
 

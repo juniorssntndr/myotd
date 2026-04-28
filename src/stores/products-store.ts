@@ -77,36 +77,48 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
   fetchFeaturedProducts: async () => {
     try {
       const response = await fetch("/api/products?featured=true&limit=8")
-      if (!response.ok) throw new Error("Failed to fetch featured products")
+      if (!response.ok) {
+        set({ featuredProducts: [] })
+        return
+      }
 
       const data = await response.json()
-      set({ featuredProducts: data.products })
+      set({ featuredProducts: data.products ?? [] })
     } catch (error) {
-      console.error("Error fetching featured products:", error)
+      set({ featuredProducts: [] })
+      console.warn("Unable to fetch featured products:", error)
     }
   },
 
   fetchCategories: async () => {
     try {
       const response = await fetch("/api/categories")
-      if (!response.ok) throw new Error("Failed to fetch categories")
+      if (!response.ok) {
+        set({ categories: [] })
+        return
+      }
 
       const categories = await response.json()
-      set({ categories })
+      set({ categories: Array.isArray(categories) ? categories : [] })
     } catch (error) {
-      console.error("Error fetching categories:", error)
+      set({ categories: [] })
+      console.warn("Unable to fetch categories:", error)
     }
   },
 
   fetchBrands: async () => {
     try {
       const response = await fetch("/api/brands")
-      if (!response.ok) throw new Error("Failed to fetch brands")
+      if (!response.ok) {
+        set({ brands: [] })
+        return
+      }
 
       const brands = await response.json()
-      set({ brands })
+      set({ brands: Array.isArray(brands) ? brands : [] })
     } catch (error) {
-      console.error("Error fetching brands:", error)
+      set({ brands: [] })
+      console.warn("Unable to fetch brands:", error)
     }
   },
 

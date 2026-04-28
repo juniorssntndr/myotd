@@ -29,6 +29,7 @@ type SandboxSponsoredCarouselProps = {
 
 export function SandboxSponsoredCarousel({ items }: SandboxSponsoredCarouselProps) {
   const [slidesPerView, setSlidesPerView] = React.useState(1)
+  const [failedImages, setFailedImages] = React.useState<Record<string, boolean>>({})
 
   React.useEffect(() => {
     const updateSlidesPerView = () => {
@@ -75,6 +76,19 @@ export function SandboxSponsoredCarousel({ items }: SandboxSponsoredCarouselProp
     })
   )
 
+  const markImageAsFailed = React.useCallback((itemId: string) => {
+    setFailedImages((previous) => {
+      if (previous[itemId]) {
+        return previous
+      }
+
+      return {
+        ...previous,
+        [itemId]: true,
+      }
+    })
+  }, [])
+
   return (
     <Carousel
       plugins={[plugin.current]}
@@ -97,13 +111,18 @@ export function SandboxSponsoredCarousel({ items }: SandboxSponsoredCarouselProp
               <Link href={item.href} className="group block">
                 <div className="relative overflow-hidden rounded-[28px] bg-[#9a795a]">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={item.image}
-                      alt={item.categoryName}
-                      fill
-                      sizes={imageSizes}
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                    {failedImages[item.id] ? (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#8b6f54] via-[#6c5239] to-[#3e2f24]" />
+                    ) : (
+                      <Image
+                        src={item.image}
+                        alt={item.categoryName}
+                        fill
+                        sizes={imageSizes}
+                        onError={() => markImageAsFailed(item.id)}
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/10" />
 
                     {item.showStoreBadge ? (

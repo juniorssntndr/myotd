@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart, Star, Check } from "lucide-react"
+import { ShoppingCart, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,13 +20,15 @@ const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1629429408209-1f912
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const [added, setAdded] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0
 
-  const productImage = product.images?.[0] || PLACEHOLDER_IMAGE
+  const productImage = imageError ? PLACEHOLDER_IMAGE : product.images?.[0] || PLACEHOLDER_IMAGE
+  const secondaryImage = !imageError && product.images?.[1] ? product.images[1] : null
 
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0)
   const isOutOfStock = totalStock === 0
@@ -68,11 +70,27 @@ export function ProductCard({ product }: ProductCardProps) {
               src={productImage}
               alt={product.name}
               fill
+              onError={() => setImageError(true)}
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
+            {secondaryImage ? (
+              <Image
+                src={secondaryImage}
+                alt={`${product.name} imagen secundaria`}
+                fill
+                className="object-cover opacity-0 transition-opacity duration-300 md:group-hover:opacity-100"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              />
+            ) : null}
           </div>
         </Link>
+
+        {product.images.length > 1 ? (
+          <span className="absolute bottom-2 left-2 z-10 rounded-full bg-background/85 px-2 py-1 text-[11px] font-medium text-foreground">
+            {product.images.length} fotos
+          </span>
+        ) : null}
 
         <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-none translate-y-full opacity-0 transition-all group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
           <Button
@@ -105,11 +123,6 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
         </Link>
-
-        <div className="mt-2 flex items-center gap-1">
-          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium">{product.rating}</span>
-        </div>
 
         <div className="mt-2 flex items-baseline gap-2">
           <span className="text-lg font-bold text-primary">

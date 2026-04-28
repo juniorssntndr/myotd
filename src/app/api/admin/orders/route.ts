@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/api-auth"
+import { resolveProductImageUrl } from "@/lib/image-url"
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         quantity: item.quantity,
         price: Number(item.price),
         total: Number(item.total),
-        image: item.product.images[0] || "",
+        image: resolveProductImageUrl(item.product.images[0] || ""),
       })),
       itemCount: order.items.reduce((sum: number, item: typeof order.items[number]) => sum + item.quantity, 0),
       createdAt: order.createdAt.toISOString(),

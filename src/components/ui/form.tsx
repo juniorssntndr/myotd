@@ -43,7 +43,7 @@ const useFormField = () => {
   }
 }
 
-interface FormItemProps extends React.HTMLAttributes<HTMLDivElement> {}
+type FormItemProps = React.HTMLAttributes<HTMLDivElement>
 
 const FormItem = React.forwardRef<HTMLDivElement, FormItemProps>(
   ({ className, ...props }, ref) => {
@@ -64,10 +64,11 @@ interface FormLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 const FormLabel = React.forwardRef<HTMLLabelElement, FormLabelProps>(
   ({ className, formItemId, ...props }, ref) => {
     const { error, formItemId: contextFormItemId } = useFormField()
-    const id = formItemId || contextFormItemId
+    const htmlFor = formItemId ?? contextFormItemId
     return (
       <label
         ref={ref}
+        htmlFor={htmlFor}
         className={cn(
           "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
           error && "text-destructive",
@@ -80,12 +81,11 @@ const FormLabel = React.forwardRef<HTMLLabelElement, FormLabelProps>(
 )
 FormLabel.displayName = "FormLabel"
 
-interface FormControlProps extends React.HTMLAttributes<HTMLElement> {}
+type FormControlProps = React.HTMLAttributes<HTMLElement>
 
 const FormControl = React.forwardRef<HTMLElement, FormControlProps>(
   ({ ...props }, ref) => {
     const { error, formItemId } = useFormField()
-    const formMessageId = `${formItemId}-message`
     return (
       <Slot
         ref={ref}
@@ -99,7 +99,7 @@ const FormControl = React.forwardRef<HTMLElement, FormControlProps>(
 )
 FormControl.displayName = "FormControl"
 
-interface FormMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+type FormMessageProps = React.HTMLAttributes<HTMLParagraphElement>
 
 const FormMessage = React.forwardRef<HTMLParagraphElement, FormMessageProps>(
   ({ className, children, ...props }, ref) => {

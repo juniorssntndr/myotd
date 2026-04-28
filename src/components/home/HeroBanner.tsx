@@ -5,8 +5,18 @@ import Link from "next/link"
 import Image from "next/image"
 import Autoplay from "embla-carousel-autoplay"
 import { motion } from "framer-motion"
+
 import { Button } from "@/components/ui/button"
 import {
+  type HomeHeroVisual,
+  resolveHeroAccentClass,
+  defaultHomeVisual,
+  resolveHeroGradientClass,
+  resolveHeroGlowClass,
+  resolveHeroTintClass,
+} from "@/lib/home-visual"
+import {
+  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -14,53 +24,40 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 
-const slides = [
-  {
-    id: 1,
-    badge: "Nueva Colección",
-    title: "Streetwear 2026",
-    subtitle: "Tu Estilo, Tu Ciudad",
-    description: "Nike, Adidas, Converse, Puma, New Balance y Zara en una selección urbana curada",
-    cta: "Ver Catálogo",
-    href: "/products",
-    gradient: "from-red-900 via-rose-900 to-slate-900",
-    overlayTint: "from-red-500/70 via-rose-500/60 to-orange-400/50",
-    image: "https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=800",
-  },
-  {
-    id: 2,
-    badge: "Hasta 40% OFF",
-    title: "Zapatillas",
-    subtitle: "Las Más Buscadas",
-    description: "Nike, Adidas, Converse, New Balance y Puma. Envío a todo el Perú",
-    cta: "Ver Ofertas",
-    href: "/products?category=zapatillas",
-    gradient: "from-rose-900 via-pink-900 to-slate-900",
-    overlayTint: "from-fuchsia-500/70 via-pink-500/65 to-rose-500/55",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
-  },
-  {
-    id: 3,
-    badge: "Bestseller",
-    title: "Hoodies & Polos",
-    subtitle: "Comodidad Total",
-    description: "Prendas versátiles para tu día a día. Calidad premium",
-    cta: "Explorar",
-    href: "/products?category=hoodies",
-    gradient: "from-rose-800 via-slate-900 to-slate-900",
-    overlayTint: "from-rose-400/60 via-violet-500/55 to-slate-500/60",
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
-  },
-]
+type HeroBannerProps = {
+  visual?: HomeHeroVisual
+}
 
-export function HeroBanner() {
+export function HeroBanner({ visual = defaultHomeVisual.hero }: HeroBannerProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   )
+  const [api, setApi] = React.useState<CarouselApi | null>(null)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
+
+  React.useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    const updateCurrentIndex = () => {
+      setCurrentIndex(api.selectedScrollSnap())
+    }
+
+    updateCurrentIndex()
+    api.on("select", updateCurrentIndex)
+    api.on("reInit", updateCurrentIndex)
+
+    return () => {
+      api.off("select", updateCurrentIndex)
+      api.off("reInit", updateCurrentIndex)
+    }
+  }, [api])
 
   return (
     <section className="relative">
       <Carousel
+        setApi={setApi}
         plugins={[plugin.current]}
         className="w-full"
         opts={{
@@ -68,11 +65,14 @@ export function HeroBanner() {
         }}
       >
         <CarouselContent>
-          {slides.map((slide) => (
+          {visual.slides.map((slide) => (
             <CarouselItem key={slide.id}>
-              <div className={`relative overflow-hidden bg-gradient-to-br ${slide.gradient}`}>
+              <div className={`relative overflow-hidden bg-gradient-to-br ${resolveHeroGradientClass(slide.gradient)}`}>
                 {/* Background Image */}
-                <div className="absolute inset-0 opacity-60">
+                <div
+                  className="absolute inset-0"
+                  style={{ opacity: visual.imageOpacity / 100 }}
+                >
                   <Image
                     src={slide.image}
                     alt=""
@@ -82,9 +82,22 @@ export function HeroBanner() {
                   />
                 </div>
 
-                <div className={`absolute inset-0 bg-gradient-to-r ${slide.overlayTint}`} />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/18 via-black/0 to-black/18" />
-                <div className="absolute inset-0 bg-[radial-gradient(80%_70%_at_50%_50%,rgba(255,255,255,0.08)_0%,rgba(0,0,0,0.16)_100%)]" />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r ${resolveHeroTintClass(slide.overlayTint)}`}
+                  style={{ opacity: visual.tintOpacity / 100 }}
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-black/0 via-black/0 to-black/0"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, rgb(0 0 0 / ${visual.sideShadeOpacity}%), transparent, rgb(0 0 0 / ${visual.sideShadeOpacity}%))`,
+                  }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `radial-gradient(80% 70% at 50% 50%, rgba(255,255,255,${visual.radialHighlightOpacity / 100}) 0%, rgba(0,0,0,${visual.radialShadowOpacity / 100}) 100%)`,
+                  }}
+                />
 
                 {/* Content */}
                 <div className="container mx-auto px-4 py-14 sm:py-16 lg:py-20 xl:py-24">
@@ -108,7 +121,7 @@ export function HeroBanner() {
                         className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl"
                       >
                         {slide.title}
-                        <span className="block text-rose-400">{slide.subtitle}</span>
+                        <span className={`block ${resolveHeroAccentClass(slide.gradient)}`}>{slide.subtitle}</span>
                       </motion.h2>
                       <motion.p
                         initial={{ opacity: 0, y: 16 }}
@@ -143,7 +156,9 @@ export function HeroBanner() {
                       viewport={{ once: false, margin: "-20%" }}
                       className="relative h-52 w-72 sm:h-72 sm:w-96 lg:h-[360px] lg:w-[540px] xl:h-[400px] xl:w-[600px]"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl rounded-full" />
+                      <div
+                        className={`absolute inset-0 rounded-full bg-gradient-to-r ${resolveHeroGlowClass(slide.overlayTint)} blur-3xl`}
+                      />
                       <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl">
                         <Image
                           src={slide.image}
@@ -167,10 +182,18 @@ export function HeroBanner() {
 
         {/* Dots Indicator */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((_, index) => (
-            <div
+          {visual.slides.map((_, index) => (
+            <button
               key={index}
-              className="h-1.5 w-6 rounded-full bg-white/30 transition-colors"
+              type="button"
+              aria-label={`Ir al slide ${index + 1}`}
+              aria-pressed={currentIndex === index}
+              onClick={() => api?.scrollTo(index)}
+              className={
+                currentIndex === index
+                  ? "h-1.5 w-8 rounded-full bg-white transition-all"
+                  : "h-1.5 w-6 rounded-full bg-white/30 transition-colors"
+              }
             />
           ))}
         </div>

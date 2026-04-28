@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 
 export type HomeSponsoredItem = {
   id: string
+  brandSlug: string
   href: string
   image: string
   logo?: string | null
@@ -26,10 +27,17 @@ export type HomeSponsoredItem = {
 
 type HomeSponsoredCarouselProps = {
   items: HomeSponsoredItem[]
+  imageOverlayOpacity?: number
+  showStoreBadgeEnabled?: boolean
 }
 
-export function HomeSponsoredCarousel({ items }: HomeSponsoredCarouselProps) {
+export function HomeSponsoredCarousel({
+  items,
+  imageOverlayOpacity = 45,
+  showStoreBadgeEnabled = true,
+}: HomeSponsoredCarouselProps) {
   const [slidesPerView, setSlidesPerView] = React.useState(1)
+  const [failedImages, setFailedImages] = React.useState<Record<string, boolean>>({})
 
   React.useEffect(() => {
     const updateSlidesPerView = () => {
@@ -76,6 +84,19 @@ export function HomeSponsoredCarousel({ items }: HomeSponsoredCarouselProps) {
     })
   )
 
+  const markImageAsFailed = React.useCallback((itemId: string) => {
+    setFailedImages((previous) => {
+      if (previous[itemId]) {
+        return previous
+      }
+
+      return {
+        ...previous,
+        [itemId]: true,
+      }
+    })
+  }, [])
+
   return (
     <Carousel
       plugins={[plugin.current]}
@@ -98,16 +119,26 @@ export function HomeSponsoredCarousel({ items }: HomeSponsoredCarouselProps) {
               <Link href={item.href} className="group block">
                 <div className="relative overflow-hidden rounded-[28px] bg-[#9a795a]">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={item.image}
-                      alt={item.categoryName}
-                      fill
-                      sizes={imageSizes}
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    {failedImages[item.id] ? (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#8b6f54] via-[#6c5239] to-[#3e2f24]" />
+                    ) : (
+                      <Image
+                        src={item.image}
+                        alt={item.categoryName}
+                        fill
+                        sizes={imageSizes}
+                        onError={() => markImageAsFailed(item.id)}
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `linear-gradient(to top, rgb(0 0 0 / ${imageOverlayOpacity}%), rgb(0 0 0 / 10%), rgb(0 0 0 / 10%))`,
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/10" />
 
-                    {item.showStoreBadge ? (
+                    {showStoreBadgeEnabled && item.showStoreBadge ? (
                       <span className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-semibold text-black shadow-sm">
                         In Store
                       </span>

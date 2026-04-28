@@ -60,7 +60,7 @@ export const useBrandsStore = create<BrandsState>()(
     {
       name: "brands-storage",
       onRehydrateStorage: () => (state) => {
-        state && state.fetchBrands()
+        if (state) void state.fetchBrands()
       },
     }
   )

@@ -1,10 +1,41 @@
 // WhatsApp utility for pre-configured messages by context
 import type { WhatsAppContext } from "@/types"
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "51999999999"
+/** Digits-only fallback when no store phone or invalid value (env or placeholder). */
+const FALLBACK_WHATSAPP_DIGITS =
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "51999999999"
 
-export function getWhatsAppUrl(context: WhatsAppContext): string {
-  const baseUrl = `https://wa.me/${WHATSAPP_NUMBER}`
+/**
+ * Turns a human-entered phone (e.g. "+51 944 290 816", "944 290 816") into wa.me digits (country + national).
+ */
+export function phoneToWhatsAppDigits(raw: string): string | null {
+  const d = raw.replace(/\D/g, "")
+  if (!d) return null
+
+  // Peru mobile: 51 + 9 digits (often starting with 9)
+  if (d.startsWith("51") && d.length >= 11) {
+    return d.slice(0, 11)
+  }
+  if (d.length === 9 && d.startsWith("9")) {
+    return `51${d}`
+  }
+
+  if (d.length >= 10 && d.length <= 15) {
+    return d
+  }
+
+  return null
+}
+
+export function getWhatsAppUrl(
+  context: WhatsAppContext,
+  storePhone?: string | null
+): string {
+  const fromSettings = storePhone?.trim()
+    ? phoneToWhatsAppDigits(storePhone.trim())
+    : null
+  const waDigits = fromSettings ?? FALLBACK_WHATSAPP_DIGITS
+  const baseUrl = `https://wa.me/${waDigits}`
 
   let message: string
 

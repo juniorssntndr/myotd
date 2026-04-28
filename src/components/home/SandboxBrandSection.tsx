@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { brands as mockBrands, products as mockProducts } from "@/data/mock-products"
 import { SandboxSponsoredCarousel, type SandboxSponsoredItem } from "@/components/home/SandboxSponsoredCarousel"
+import { resolveProductImageUrl, sanitizeImageUrl } from "@/lib/image-url"
 
 function formatCategoryName(value: string) {
   return value
@@ -61,7 +62,7 @@ async function getSponsoredItems() {
       items.push({
         id: product.id,
         href: `/products?brand=${product.brand.slug}`,
-        image: product.images[0],
+        image: resolveProductImageUrl(product.images[0]),
         logo: product.brand.logo,
         brandName: product.brand.name,
         categoryName: product.category.name,
@@ -88,7 +89,7 @@ async function getSponsoredItems() {
     items.push({
       id: product.id,
       href: `/products?brand=${brand.slug}`,
-      image: product.images[0],
+      image: sanitizeImageUrl(product.images[0]),
       logo: brand.logo,
       brandName: brand.name,
       categoryName: formatCategoryName(product.category),

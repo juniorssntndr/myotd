@@ -40,9 +40,9 @@ export function Footer() {
   return (
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
-          <div className="lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/myotd-logo.png" alt="Myotd" width={170} height={60} className="h-12 w-auto shrink-0" />
             </Link>

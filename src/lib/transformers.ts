@@ -19,6 +19,7 @@ type CategoryWithCount = PrismaCategory & {
 
 type BrandWithCount = PrismaBrand & {
   _count?: { products: number }
+  products?: { images: string[] | any }[]
 }
 
 export function transformProduct(product: ProductWithRelations): Product {
@@ -70,11 +71,17 @@ export function transformCategory(category: CategoryWithCount): Category {
 }
 
 export function transformBrand(brand: BrandWithCount): Brand {
+  const catalogImage =
+    brand.products && brand.products.length > 0 && Array.isArray(brand.products[0].images)
+      ? resolveProductImageList(brand.products[0].images)[0]
+      : undefined
+
   return {
     id: brand.id,
     name: brand.name,
     slug: brand.slug,
     logo: brand.logo || undefined,
+    catalogImage,
     productCount: brand._count?.products || 0,
   }
 }

@@ -100,7 +100,10 @@ export const homeVisualSlideSchema = z.object({
   href: z.string().min(1).max(256),
   gradient: gradientPresetSchema,
   overlayTint: tintPresetSchema,
-  image: z.string().url(),
+  image: z.string().min(1).max(512).refine(
+    (val) => val.startsWith("/") || z.string().url().safeParse(val).success,
+    { message: "Debe ser una URL válida o una ruta local que empiece con /" }
+  ),
 })
 
 /** Para formularios admin (react-hook-form): números estrictos, sin coerce. */
@@ -124,8 +127,20 @@ export const homeHeroVisualSchema = z.object({
 
 const brandOverrideEntrySchema = z.object({
   displayName: z.string().max(80).optional(),
-  heroImage: z.union([z.string().url(), z.literal("")]).optional(),
-  logoUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  heroImage: z
+    .string()
+    .max(512)
+    .refine((val) => !val || val.startsWith("/") || z.string().url().safeParse(val).success, {
+      message: "Debe ser una URL válida o una ruta local que empiece con /",
+    })
+    .optional(),
+  logoUrl: z
+    .string()
+    .max(512)
+    .refine((val) => !val || val.startsWith("/") || z.string().url().safeParse(val).success, {
+      message: "Debe ser una URL válida o una ruta local que empiece con /",
+    })
+    .optional(),
 })
 
 export const homeBrandsVisualSchema = z.object({
@@ -139,7 +154,13 @@ export const homeBrandsVisualSchema = z.object({
 const offerToneKeySchema = z.enum(["tone0", "tone1", "tone2", "tone3", "tone4"])
 
 const categoryOfferOverrideSchema = z.object({
-  imageUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  imageUrl: z
+    .string()
+    .max(512)
+    .refine((val) => !val || val.startsWith("/") || z.string().url().safeParse(val).success, {
+      message: "Debe ser una URL válida o una ruta local que empiece con /",
+    })
+    .optional(),
   toneKey: offerToneKeySchema.optional(),
 })
 

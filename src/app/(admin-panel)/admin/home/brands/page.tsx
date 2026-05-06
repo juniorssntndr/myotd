@@ -275,36 +275,72 @@ export default function AdminHomeBrandsPage() {
                       <p className="font-medium">{brand.name}</p>
                       <p className="text-xs text-muted-foreground">{brand.slug}</p>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Nombre en carrusel</Label>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold">Nombre en carrusel</Label>
                         <Input
                           placeholder="(catálogo)"
+                          className="h-8 text-xs"
                           value={row.displayName ?? ""}
                           onChange={(event) =>
                             updateOverride(brand.slug, "displayName", event.target.value)
                           }
                         />
+                        <p className="truncate text-[10px] text-muted-foreground" title={brand.name}>
+                          Activo: <span className="text-foreground/80 font-medium">{row.displayName || brand.name}</span>
+                        </p>
                       </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Imagen de fondo URL</Label>
-                        <Input
-                          placeholder="(producto)"
-                          value={row.heroImage ?? ""}
-                          onChange={(event) =>
-                            updateOverride(brand.slug, "heroImage", event.target.value)
-                          }
-                        />
+
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold">Imagen de fondo (Card)</Label>
+                        <div className="flex gap-2">
+                          <div className="h-8 w-8 shrink-0 overflow-hidden rounded border bg-muted">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img 
+                              src={row.heroImage || brand.catalogImage || "/placeholder.svg"} 
+                              alt="" 
+                              className="h-full w-full object-cover"
+                              onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                            />
+                          </div>
+                          <Input
+                            placeholder="(producto)"
+                            className="h-8 text-xs"
+                            value={row.heroImage ?? ""}
+                            onChange={(event) =>
+                              updateOverride(brand.slug, "heroImage", event.target.value)
+                            }
+                          />
+                        </div>
+                        <p className="truncate text-[10px] text-muted-foreground" title={row.heroImage || brand.catalogImage}>
+                          URL: <span className="text-foreground/80">{row.heroImage || brand.catalogImage || "Sin imagen"}</span>
+                        </p>
                       </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Logo URL</Label>
-                        <Input
-                          placeholder="(marca)"
-                          value={row.logoUrl ?? ""}
-                          onChange={(event) =>
-                            updateOverride(brand.slug, "logoUrl", event.target.value)
-                          }
-                        />
+
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold">Logo URL</Label>
+                        <div className="flex gap-2">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border bg-muted p-0.5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img 
+                              src={row.logoUrl || brand.logo || "/placeholder.svg"} 
+                              alt="" 
+                              className="max-h-full max-w-full object-contain"
+                              onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                            />
+                          </div>
+                          <Input
+                            placeholder="(marca)"
+                            className="h-8 text-xs"
+                            value={row.logoUrl ?? ""}
+                            onChange={(event) =>
+                              updateOverride(brand.slug, "logoUrl", event.target.value)
+                            }
+                          />
+                        </div>
+                        <p className="truncate text-[10px] text-muted-foreground" title={row.logoUrl || brand.logo}>
+                          URL: <span className="text-foreground/80">{row.logoUrl || brand.logo || "Sin logo"}</span>
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -16,6 +16,7 @@ export const ALLOWED_IMAGE_HOSTS = [
 function isAllowedHost(hostname: string) {
   return (
     ALLOWED_IMAGE_HOSTS.includes(hostname) ||
+    hostname === "imgix.net" ||
     hostname.endsWith(".imgix.net")
   )
 }

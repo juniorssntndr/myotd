@@ -216,9 +216,25 @@ export default function AdminHomeHeroPage() {
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
                       <Label>URL imagen</Label>
-                      <FormControl>
-                        <Input {...field} type="url" />
-                      </FormControl>
+                      <div className="flex gap-4">
+                        <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-lg border bg-muted shadow-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img 
+                            src={field.value || "/placeholder.svg"} 
+                            alt="" 
+                            className="h-full w-full object-cover"
+                            onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                          />
+                          {!field.value && (
+                            <div className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground uppercase tracking-tight">
+                              Sin imagen
+                            </div>
+                          )}
+                        </div>
+                        <FormControl>
+                          <Input {...field} type="url" placeholder="https://images.unsplash.com/..." />
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

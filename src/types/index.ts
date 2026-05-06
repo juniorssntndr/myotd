@@ -92,6 +92,7 @@ export interface Brand {
   name: string
   slug: string
   logo?: string
+  catalogImage?: string
   productCount: number
   isFavorite?: boolean
 }

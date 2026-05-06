@@ -55,11 +55,11 @@ async function getSponsoredItems() {
     })
 
     for (const product of featuredProducts) {
-      if (!product.brand || !product.images[0] || seenBrands.has(product.brand.id)) {
+      if (!product.brand || !product.images[0] || seenBrands.has(product.brand.slug)) {
         continue
       }
 
-      seenBrands.add(product.brand.id)
+      seenBrands.add(product.brand.slug)
       items.push({
         id: product.id,
         brandSlug: product.brand.slug,
@@ -83,11 +83,11 @@ async function getSponsoredItems() {
   for (const product of mockProducts) {
     const brand = mockBrandById.get(product.brandId)
 
-    if (!brand || !product.images[0] || seenBrands.has(brand.id)) {
+    if (!brand || !product.images[0] || seenBrands.has(brand.slug)) {
       continue
     }
 
-    seenBrands.add(brand.id)
+    seenBrands.add(brand.slug)
     items.push({
       id: product.id,
       brandSlug: brand.slug,

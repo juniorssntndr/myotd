@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Bell, Search } from "lucide-react"
 
@@ -39,6 +39,12 @@ export function AdminHeader({ user }: AdminHeaderProps) {
   const pathname = usePathname()
   const pageMeta = useMemo(() => getAdminPageMeta(pathname), [pathname])
 
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "Nuevo pedido #1024", time: "Hace 5 minutos" },
+    { id: 2, title: "Nuevo usuario registrado", time: "Hace 2 horas" },
+    { id: 3, title: "Stock bajo: Nike Air Force 1", time: "Hace 5 horas" },
+  ])
+
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
       {/* Mobile Menu */}
@@ -61,12 +67,54 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       <div className="flex items-center gap-2">
         <ThemeToggle />
 
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
-            3
-          </span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-4 w-4" />
+              {notifications.length > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
+                  {notifications.length}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>Notificaciones</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="flex flex-col gap-1 p-1">
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No tienes notificaciones
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="flex flex-col gap-1 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-default transition-colors"
+                  >
+                    <span className="font-medium">{notification.title}</span>
+                    <span className="text-xs text-muted-foreground">{notification.time}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="p-2">
+                  <Button
+                    variant="outline"
+                    className="w-full text-xs"
+                    size="sm"
+                    onClick={() => setNotifications([])}
+                  >
+                    Marcar todas como leídas
+                  </Button>
+                </div>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

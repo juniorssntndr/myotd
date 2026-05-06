@@ -9,11 +9,15 @@ export const IMGIX_BASE_URL = `https://${IMGIX_HOST}`
 export const ALLOWED_IMAGE_HOSTS = [
   "images.unsplash.com",
   "cdn.jsdelivr.net",
+  "res.cloudinary.com",
   IMGIX_HOST,
 ]
 
 function isAllowedHost(hostname: string) {
-  return ALLOWED_IMAGE_HOSTS.includes(hostname)
+  return (
+    ALLOWED_IMAGE_HOSTS.includes(hostname) ||
+    hostname.endsWith(".imgix.net")
+  )
 }
 
 export function validateImageUrl(url: string): { valid: true } | { valid: false; error: string } {
@@ -33,7 +37,7 @@ export function validateImageUrl(url: string): { valid: true } | { valid: false;
     }
 
     if (!isAllowedHost(parsed.hostname)) {
-      const allowed = ALLOWED_IMAGE_HOSTS.join(", ")
+      const allowed = [...ALLOWED_IMAGE_HOSTS.filter(h => h !== IMGIX_HOST), "cualquier cuenta de *.imgix.net"].join(", ")
       return { valid: false, error: `Host no permitido. Usá: ${allowed}` }
     }
 

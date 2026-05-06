@@ -15,7 +15,11 @@ const nextConfig: NextConfig = {
 
       {
         protocol: "https",
-        hostname: "69efe44900fff4c9787203ec.imgix.net",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.imgix.net",
       },
     ],
   },

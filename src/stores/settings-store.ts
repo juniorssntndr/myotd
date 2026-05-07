@@ -18,9 +18,7 @@ export interface GeneralSettings {
 
 export interface SocialLinks {
   facebook: string
-  twitter: string
   instagram: string
-  youtube: string
   tiktok: string
 }
 
@@ -76,11 +74,9 @@ const defaultGeneral: GeneralSettings = {
 }
 
 const defaultSocialLinks: SocialLinks = {
-  facebook: "",
-  twitter: "",
-  instagram: "",
-  youtube: "",
-  tiktok: "",
+  facebook: "https://facebook.com",
+  instagram: "https://instagram.com",
+  tiktok: "https://tiktok.com",
 }
 
 const defaultStoreConfig: StoreConfig = {
@@ -157,9 +153,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         },
         socialLinks: {
           facebook: data.facebook || defaultSocialLinks.facebook,
-          twitter: data.twitter || defaultSocialLinks.twitter,
           instagram: data.instagram || defaultSocialLinks.instagram,
-          youtube: data.youtube || defaultSocialLinks.youtube,
           tiktok: data.tiktok || defaultSocialLinks.tiktok,
         },
         storeConfig: {

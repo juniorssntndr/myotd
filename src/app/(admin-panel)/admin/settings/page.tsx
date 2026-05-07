@@ -45,9 +45,7 @@ const generalSchema = z.object({
 
 const socialLinksSchema = z.object({
   facebook: z.string().url("URL inválida").or(z.literal("")),
-  twitter: z.string().url("URL inválida").or(z.literal("")),
   instagram: z.string().url("URL inválida").or(z.literal("")),
-  youtube: z.string().url("URL inválida").or(z.literal("")),
   tiktok: z.string().url("URL inválida").or(z.literal("")),
 })
 
@@ -624,38 +622,12 @@ export default function AdminSettingsPage() {
                   />
                   <FormField
                     control={socialForm.control}
-                    name="twitter"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label>Twitter / X</Label>
-                        <FormControl>
-                          <Input placeholder="https://x.com/tu-usuario" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={socialForm.control}
                     name="instagram"
                     render={({ field }) => (
                       <FormItem>
                         <Label>Instagram</Label>
                         <FormControl>
                           <Input placeholder="https://instagram.com/tu-usuario" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={socialForm.control}
-                    name="youtube"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label>YouTube</Label>
-                        <FormControl>
-                          <Input placeholder="https://youtube.com/tu-canal" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

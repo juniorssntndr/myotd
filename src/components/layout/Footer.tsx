@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
+import { Facebook, Instagram, Mail, Phone, MapPin } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { useSettingsStore } from "@/stores/settings-store"
 
@@ -51,23 +51,28 @@ export function Footer() {
             </p>
             <div className="mt-4 flex gap-3">
               {socialLinks.facebook && (
-                <Link href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                <Link href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-foreground transition-colors">
                   <Facebook className="h-5 w-5" />
                 </Link>
               )}
-              {socialLinks.twitter && (
-                <Link href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <Twitter className="h-5 w-5" />
-                </Link>
-              )}
               {socialLinks.instagram && (
-                <Link href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                <Link href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-foreground transition-colors">
                   <Instagram className="h-5 w-5" />
                 </Link>
               )}
-              {socialLinks.youtube && (
-                <Link href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <Youtube className="h-5 w-5" />
+              {socialLinks.tiktok && (
+                <Link href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-foreground transition-colors">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                  </svg>
                 </Link>
               )}
             </div>

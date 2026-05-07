@@ -28,12 +28,15 @@ export const useNotificationStore = create<NotificationState>()(
       notifications: initialNotifications,
       hydrated: false,
       setNotifications: (notifications) => set({ notifications }),
-      markAllAsRead: () => set({ notifications: [] }),
+      markAllAsRead: () => {
+        set({ notifications: [] });
+      },
       setHydrated: (state) => set({ hydrated: state }),
     }),
     {
-      name: "admin-notifications",
+      name: "admin-notifications-v2",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ notifications: state.notifications }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true)
       },

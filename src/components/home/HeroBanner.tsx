@@ -149,7 +149,7 @@ export function HeroBanner({ visual = defaultHomeVisual.hero }: HeroBannerProps)
                         >
                           {slide.title}
                           <span 
-                            className={`block ${!typography?.subtitleColor ? resolveHeroAccentClass(slide.gradient) : ""}`}
+                            className={`block ${typography?.subtitleFont ?? ""} ${!typography?.subtitleColor ? resolveHeroAccentClass(slide.gradient) : ""}`}
                             style={{ color: typography?.subtitleColor }}
                           >
                             {slide.subtitle}

@@ -1,5 +1,16 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { 
+  Geist, 
+  Geist_Mono, 
+  Raleway, 
+  Playfair_Display, 
+  Montserrat, 
+  Outfit, 
+  Sacramento, 
+  Lora, 
+  Poppins, 
+  Bebas_Neue 
+} from "next/font/google"
 import { Toaster } from "sonner"
 
 import "./globals.css"
@@ -16,6 +27,49 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+})
+
+const raleway = Raleway({
+  variable: "--font-raleway",
+  subsets: ["latin"],
+})
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+})
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+})
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+})
+
+const sacramento = Sacramento({
+  variable: "--font-sacramento",
+  subsets: ["latin"],
+  weight: "400",
+})
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+})
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+})
+
+const bebas = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  weight: "400",
 })
 
 export const metadata: Metadata = {
@@ -39,7 +93,19 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`
+          ${geistSans.variable} 
+          ${geistMono.variable} 
+          ${raleway.variable} 
+          ${playfair.variable} 
+          ${montserrat.variable} 
+          ${outfit.variable} 
+          ${sacramento.variable} 
+          ${lora.variable} 
+          ${poppins.variable} 
+          ${bebas.variable} 
+          antialiased
+        `}
       >
         <SessionProvider>
           <ThemeProvider

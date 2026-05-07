@@ -25,6 +25,18 @@ interface HeroSlideFormProps {
   index: number
 }
 
+const HERO_FONT_OPTIONS = [
+  { label: "Inter (Sans)", value: "font-sans", class: "font-sans" },
+  { label: "Raleway (Elegant Sans)", value: "font-raleway", class: "font-raleway" },
+  { label: "Montserrat (Modern Display)", value: "font-montserrat", class: "font-montserrat" },
+  { label: "Outfit (Modernist)", value: "font-outfit", class: "font-outfit" },
+  { label: "Poppins (Friendly Sans)", value: "font-poppins", class: "font-poppins" },
+  { label: "Playfair Display (Premium Serif)", value: "font-playfair", class: "font-playfair" },
+  { label: "Lora (Contemporary Serif)", value: "font-lora", class: "font-lora" },
+  { label: "Bebas Neue (Condensed Bold)", value: "font-bebas", class: "font-bebas" },
+  { label: "Sacramento (Classic Script)", value: "font-sacramento", class: "font-sacramento" },
+]
+
 export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -35,7 +47,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem>
             <Label>Badge</Label>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -49,7 +61,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem>
             <Label>Título</Label>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -63,7 +75,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem>
             <Label>Subtítulo</Label>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -77,7 +89,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem>
             <Label>Texto botón</Label>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -91,7 +103,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem className="sm:col-span-2">
             <Label>URL destino</Label>
             <FormControl>
-              <Input {...field} placeholder="/products" />
+              <Input {...field} value={field.value ?? ""} placeholder="/products" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -105,7 +117,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
           <FormItem className="sm:col-span-2">
             <Label>Descripción</Label>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -134,7 +146,7 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
                 )}
               </div>
               <FormControl>
-                <Input {...field} type="url" placeholder="https://images.unsplash.com/..." />
+                <Input {...field} value={field.value ?? ""} type="url" placeholder="https://images.unsplash.com/..." />
               </FormControl>
             </div>
             <FormMessage />
@@ -193,10 +205,35 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="font-sans">Inter (Sans)</SelectItem>
-                      <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
-                      <SelectItem value="font-display">Montserrat (Display)</SelectItem>
-                      <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                      {HERO_FONT_OPTIONS.map((font) => (
+                        <SelectItem key={font.value} value={font.value}>
+                          <span className={font.class}>{font.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`slides.${index}.typography.subtitleFont`}
+              render={({ field }) => (
+                <FormItem>
+                  <Label className="text-xs">Fuente del Subtítulo</Label>
+                  <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {HERO_FONT_OPTIONS.map((font) => (
+                        <SelectItem key={font.value} value={font.value}>
+                          <span className={font.class}>{font.label}</span>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormItem>

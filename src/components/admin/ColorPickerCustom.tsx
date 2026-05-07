@@ -65,7 +65,7 @@ export function ColorPickerCustom({ color, onChange, label }: ColorPickerCustomP
           )}
         </div>
         <Input
-          value={currentHex}
+          value={currentHex ?? ""}
           onChange={handleHexChange}
           className="h-10 font-mono text-sm uppercase tracking-tight focus-visible:ring-primary/30"
           placeholder="#FFFFFF"

@@ -106,10 +106,15 @@ const tintPresetSchema = z.enum(HERO_TINT_KEYS)
 const clampPercentage = z.coerce.number().min(0).max(100)
 
 export const HERO_FONT_OPTIONS = [
-  { value: "font-sans", label: "Geist (Sans)" },
-  { value: "font-serif", label: "Playfair (Elegante)" },
-  { value: "font-display", label: "Montserrat (Impacto)" },
-  { value: "font-outfit", label: "Outfit (Premium)" },
+  { value: "font-sans", label: "Geist (Base Moderna)" },
+  { value: "font-raleway", label: "Raleway (Elegancia Minimalista)" },
+  { value: "font-montserrat", label: "Montserrat (Impacto Visual)" },
+  { value: "font-outfit", label: "Outfit (Geométrica Limpia)" },
+  { value: "font-poppins", label: "Poppins (Popular / Versátil)" },
+  { value: "font-playfair", label: "Playfair (Clásico / Lujo)" },
+  { value: "font-lora", label: "Lora (Serif Moderna)" },
+  { value: "font-bebas", label: "Bebas Neue (Título Bold)" },
+  { value: "font-sacramento", label: "Sacramento (Escritura / Acento)" },
 ] as const
 
 const customColorPointSchema = z.object({
@@ -126,6 +131,7 @@ const customColorsSchema = z.object({
 
 const typographySchema = z.object({
   titleFont: z.string().default("font-sans"),
+  subtitleFont: z.string().default("font-sans"),
   titleColor: z.string().min(4).max(32).default("#ffffff"),
   subtitleColor: z.string().min(4).max(32).default("#ffffff"),
   accentColor: z.string().min(4).max(32).optional(),

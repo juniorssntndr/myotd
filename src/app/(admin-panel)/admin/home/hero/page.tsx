@@ -146,7 +146,7 @@ export default function AdminHomeHeroPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={field.value}
+                        value={field.value ?? 0}
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>
@@ -165,7 +165,7 @@ export default function AdminHomeHeroPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={field.value}
+                        value={field.value ?? 0}
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>
@@ -184,7 +184,7 @@ export default function AdminHomeHeroPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={field.value}
+                        value={field.value ?? 0}
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>
@@ -203,7 +203,7 @@ export default function AdminHomeHeroPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={field.value}
+                        value={field.value ?? 0}
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>
@@ -222,7 +222,7 @@ export default function AdminHomeHeroPage() {
                         type="range"
                         min={0}
                         max={100}
-                        value={field.value}
+                        value={field.value ?? 0}
                         onChange={(event) => field.onChange(Number(event.target.value))}
                       />
                     </FormControl>

@@ -16,7 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ColorPickerCustom } from "@/components/admin/ColorPickerCustom"
-import { HERO_GRADIENT_OPTIONS, homeHeroFormSchema } from "@/lib/home-visual"
+import { HERO_GRADIENT_OPTIONS, HERO_FONT_OPTIONS, homeHeroFormSchema } from "@/lib/home-visual"
+import { Slider } from "@/components/ui/slider"
 
 type HeroFormValues = z.infer<typeof homeHeroFormSchema>
 
@@ -25,17 +26,7 @@ interface HeroSlideFormProps {
   index: number
 }
 
-const HERO_FONT_OPTIONS = [
-  { label: "Inter (Sans)", value: "font-sans", class: "font-sans" },
-  { label: "Raleway (Elegant Sans)", value: "font-raleway", class: "font-raleway" },
-  { label: "Montserrat (Modern Display)", value: "font-montserrat", class: "font-montserrat" },
-  { label: "Outfit (Modernist)", value: "font-outfit", class: "font-outfit" },
-  { label: "Poppins (Friendly Sans)", value: "font-poppins", class: "font-poppins" },
-  { label: "Playfair Display (Premium Serif)", value: "font-playfair", class: "font-playfair" },
-  { label: "Lora (Contemporary Serif)", value: "font-lora", class: "font-lora" },
-  { label: "Bebas Neue (Condensed Bold)", value: "font-bebas", class: "font-bebas" },
-  { label: "Sacramento (Classic Script)", value: "font-sacramento", class: "font-sacramento" },
-]
+
 
 export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
   return (
@@ -192,53 +183,107 @@ export function HeroSlideForm({ form, index }: HeroSlideFormProps) {
         <div className="grid gap-8 sm:grid-cols-2">
           {/* Typography */}
           <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name={`slides.${index}.typography.titleFont`}
-              render={({ field }) => (
-                <FormItem>
-                  <Label className="text-xs">Fuente del Título</Label>
-                  <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
-                    <FormControl>
-                      <SelectTrigger className="bg-background/50">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {HERO_FONT_OPTIONS.map((font) => (
-                        <SelectItem key={font.value} value={font.value}>
-                          <span className={font.class}>{font.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+            {/* Title Font & Size */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name={`slides.${index}.typography.titleFont`}
+                render={({ field }) => (
+                  <FormItem>
+                    <Label className="text-xs">Fuente Título</Label>
+                    <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                      <FormControl>
+                        <SelectTrigger className="bg-background/50 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {HERO_FONT_OPTIONS.map((font) => (
+                          <SelectItem key={font.value} value={font.value}>
+                            <span className={font.value}>{font.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name={`slides.${index}.typography.subtitleFont`}
-              render={({ field }) => (
-                <FormItem>
-                  <Label className="text-xs">Fuente del Subtítulo</Label>
-                  <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+              <FormField
+                control={form.control}
+                name={`slides.${index}.typography.titleSize`}
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Tamaño Título</Label>
+                      <span className="text-[10px] font-mono text-muted-foreground">{field.value ?? 60}px</span>
+                    </div>
                     <FormControl>
-                      <SelectTrigger className="bg-background/50">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <div className="pt-2">
+                        <Slider
+                          min={24}
+                          max={120}
+                          step={1}
+                          value={[field.value ?? 60]}
+                          onValueChange={(vals) => field.onChange(vals[0])}
+                        />
+                      </div>
                     </FormControl>
-                    <SelectContent>
-                      {HERO_FONT_OPTIONS.map((font) => (
-                        <SelectItem key={font.value} value={font.value}>
-                          <span className={font.class}>{font.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Subtitle Font & Size */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name={`slides.${index}.typography.subtitleFont`}
+                render={({ field }) => (
+                  <FormItem>
+                    <Label className="text-xs">Fuente Subtítulo</Label>
+                    <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                      <FormControl>
+                        <SelectTrigger className="bg-background/50 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {HERO_FONT_OPTIONS.map((font) => (
+                          <SelectItem key={font.value} value={font.value}>
+                            <span className={font.value}>{font.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`slides.${index}.typography.subtitleSize`}
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Tamaño Subtítulo</Label>
+                      <span className="text-[10px] font-mono text-muted-foreground">{field.value ?? 24}px</span>
+                    </div>
+                    <FormControl>
+                      <div className="pt-2">
+                        <Slider
+                          min={12}
+                          max={80}
+                          step={1}
+                          value={[field.value ?? 24]}
+                          onValueChange={(vals) => field.onChange(vals[0])}
+                        />
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

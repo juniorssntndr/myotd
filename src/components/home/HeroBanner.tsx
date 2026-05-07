@@ -144,13 +144,21 @@ export function HeroBanner({ visual = defaultHomeVisual.hero }: HeroBannerProps)
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, ease: "easeOut", delay: 0.06 }}
                           viewport={{ once: false, margin: "-20%" }}
-                          className={`text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl ${typography?.titleFont ?? ""}`}
-                          style={{ color: typography?.titleColor ?? "#ffffff" }}
+                          className={`font-bold tracking-tight ${typography?.titleFont ?? ""}`}
+                          style={{ 
+                            color: typography?.titleColor ?? "#ffffff",
+                            fontSize: typography?.titleSize ? `${typography.titleSize}px` : undefined,
+                            lineHeight: 1.1
+                          }}
                         >
                           {slide.title}
                           <span 
                             className={`block ${typography?.subtitleFont ?? ""} ${!typography?.subtitleColor ? resolveHeroAccentClass(slide.gradient) : ""}`}
-                            style={{ color: typography?.subtitleColor }}
+                            style={{ 
+                              color: typography?.subtitleColor,
+                              fontSize: typography?.subtitleSize ? `${typography.subtitleSize}px` : undefined,
+                              marginTop: '0.25em'
+                            }}
                           >
                             {slide.subtitle}
                           </span>

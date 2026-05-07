@@ -132,6 +132,8 @@ const customColorsSchema = z.object({
 const typographySchema = z.object({
   titleFont: z.string().default("font-sans"),
   subtitleFont: z.string().default("font-sans"),
+  titleSize: z.number().min(24).max(120).default(60),
+  subtitleSize: z.number().min(14).max(80).default(24),
   titleColor: z.string().min(4).max(32).default("#ffffff"),
   subtitleColor: z.string().min(4).max(32).default("#ffffff"),
   accentColor: z.string().min(4).max(32).optional(),

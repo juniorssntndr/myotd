@@ -26,6 +26,7 @@ const footerLinks = {
     { name: "Mis pedidos", href: "/profile/orders" },
     { name: "Direcciones", href: "/profile/addresses" },
     { name: "Configuración", href: "/profile/settings" },
+    { name: "Libro de reclamaciones", href: "https://www.librovirtual.pe/r/carta-oblitas-santiago-cristhian" },
   ],
   legal: [
     { name: "Login seguro", href: "/login" },
@@ -120,6 +121,8 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {link.name}

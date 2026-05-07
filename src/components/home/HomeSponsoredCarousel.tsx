@@ -3,13 +3,14 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { useAnimation, motion } from "framer-motion"
 import Autoplay from "embla-carousel-autoplay"
 
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,78 @@ type HomeSponsoredCarouselProps = {
   showStoreBadgeEnabled?: boolean
 }
 
+/* ------------------------------------------------------------------ */
+/*  Individual animated card — handles both scroll AND carousel drag  */
+/* ------------------------------------------------------------------ */
+function AnimatedCard({
+  index,
+  children,
+  scrollKey,
+}: {
+  index: number
+  children: React.ReactNode
+  scrollKey: number
+}) {
+  const controls = useAnimation()
+  const ref = React.useRef<HTMLDivElement>(null)
+  const lastInView = React.useRef(false)
+
+  /* Trigger cascade on vertical scroll (IntersectionObserver) */
+  React.useEffect(() => {
+    const node = ref.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !lastInView.current) {
+          lastInView.current = true
+          controls.start({ opacity: 1, y: 0 })
+        } else if (!entry.isIntersecting && lastInView.current) {
+          lastInView.current = false
+          controls.set({ opacity: 0, y: 48 })
+        }
+      },
+      { rootMargin: "-40px" }
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [controls])
+
+  /* Trigger cascade on horizontal drag (Embla scroll event) */
+  React.useEffect(() => {
+    if (scrollKey === 0) return // skip initial mount
+    const node = ref.current
+    if (!node) return
+
+    const rect = node.getBoundingClientRect()
+    const inView = rect.right > 0 && rect.left < window.innerWidth
+
+    if (inView) {
+      controls.set({ opacity: 0, y: 48 })
+      controls.start({ opacity: 1, y: 0 })
+      lastInView.current = true
+    } else {
+      controls.set({ opacity: 0, y: 48 })
+      lastInView.current = false
+    }
+  }, [scrollKey, controls])
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 48 }}
+      animate={controls}
+      transition={{ duration: 0.45, delay: index * 0.08 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main carousel                                                     */
+/* ------------------------------------------------------------------ */
 export function HomeSponsoredCarousel({
   items,
   imageOverlayOpacity = 45,
@@ -38,6 +111,7 @@ export function HomeSponsoredCarousel({
 }: HomeSponsoredCarouselProps) {
   const [slidesPerView, setSlidesPerView] = React.useState(1)
   const [failedImages, setFailedImages] = React.useState<Record<string, boolean>>({})
+  const [scrollKey, setScrollKey] = React.useState(0)
 
   React.useEffect(() => {
     const updateSlidesPerView = () => {
@@ -97,11 +171,21 @@ export function HomeSponsoredCarousel({
     })
   }, [])
 
+  /* Listen to Embla's settle event to trigger cascade on drag */
+  const onApiReady = React.useCallback((api: CarouselApi) => {
+    if (!api) return
+
+    api.on("settle", () => {
+      setScrollKey((k) => k + 1)
+    })
+  }, [])
+
   return (
     <Carousel
       plugins={[plugin.current]}
       opts={{ align: "start", loop: items.length > 1 }}
       className="w-full"
+      setApi={onApiReady}
     >
       <CarouselContent>
         {items.map((item, index) => (
@@ -110,12 +194,7 @@ export function HomeSponsoredCarousel({
             className="pl-4"
             style={{ flex: `0 0 ${itemBasis}` }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 48 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: index * 0.08 }}
-              viewport={{ once: false, margin: "-40px" }}
-            >
+            <AnimatedCard index={index} scrollKey={scrollKey}>
               <Link href={item.href} className="group block">
                 <div className="relative overflow-hidden rounded-[28px] bg-[#9a795a]">
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -206,7 +285,7 @@ export function HomeSponsoredCarousel({
                   </span>
                 </div>
               </Link>
-            </motion.div>
+            </AnimatedCard>
           </CarouselItem>
         ))}
       </CarouselContent>

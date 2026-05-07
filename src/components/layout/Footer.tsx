@@ -35,7 +35,7 @@ const footerLinks = {
 }
 
 export function Footer() {
-  const { socialLinks } = useSettingsStore()
+  const { socialLinks, general } = useSettingsStore()
 
   return (
     <footer className="border-t bg-muted/30">
@@ -47,7 +47,7 @@ export function Footer() {
               <Image src="/myotd-logo.png" alt="Myotd" width={170} height={60} className="h-12 w-auto shrink-0" />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
-              Moda urbana multimarca para Perú. Envíos a todo el Perú • Wholesale disponible
+              {general.storeDescription || "Moda urbana multimarca para Perú. Envíos a todo el Perú • Wholesale disponible"}
             </p>
             <div className="mt-4 flex gap-3">
               {socialLinks.facebook && (
@@ -130,15 +130,15 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>Av. Lima 123, Lima, Peru</span>
+                <span>{general.storeAddress || "Av. Lima 123, Lima, Peru"}</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span>+51 999 888 777</span>
+                <span>{general.storePhone || "+51 999 888 777"}</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0" />
-                <span>info@myotd.pe</span>
+                <span>{general.storeEmail || "info@myotd.pe"}</span>
               </li>
             </ul>
           </div>

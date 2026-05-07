@@ -12,8 +12,8 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { HomeVisualImageInstructions } from "@/components/admin/HomeVisualImageInstructions"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ColorPickerCustom } from "@/components/admin/ColorPickerCustom"
 import {
   Select,
   SelectContent,
@@ -145,6 +145,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.title`}
@@ -158,6 +300,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.subtitle`}
@@ -171,6 +455,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.cta`}
@@ -184,6 +610,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.href`}
@@ -197,6 +765,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.description`}
@@ -210,6 +920,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.image`}
@@ -239,6 +1091,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.gradient`}
@@ -263,6 +1257,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name={`slides.${index}.overlayTint`}
@@ -287,6 +1423,148 @@ export default function AdminHomeHeroPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Personalización Visual Avanzada */}
+                <div className="sm:col-span-2 space-y-6 pt-6 border-t mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-border" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Personalización Visual Avanzada
+                    </h3>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {/* Typography */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.typography.titleFont`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Label className="text-xs">Fuente del Título</Label>
+                            <Select onValueChange={field.onChange} value={field.value || "font-sans"}>
+                              <FormControl>
+                                <SelectTrigger className="bg-background/50">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="font-sans">Inter (Sans)</SelectItem>
+                                <SelectItem value="font-serif">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="font-display">Montserrat (Display)</SelectItem>
+                                <SelectItem value="font-outfit">Outfit (Modern)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.titleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Título"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`slides.${index}.typography.subtitleColor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <ColorPickerCustom
+                                label="Color Subtítulo"
+                                color={field.value || "#ffffff"}
+                                onChange={field.onChange}
+                              />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Custom Colors Section */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`slides.${index}.customColors.useCustom`}
+                        render={({ field }) => (
+                          <div className="flex items-center space-x-2 rounded-lg border bg-muted/20 p-3">
+                            <input
+                              type="checkbox"
+                              id={`use-custom-${index}`}
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <Label
+                              htmlFor={`use-custom-${index}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              Usar colores HEX personalizados
+                            </Label>
+                          </div>
+                        )}
+                      />
+
+                      {form.watch(`slides.${index}.customColors.useCustom`) && (
+                        <div className="space-y-4 rounded-xl border bg-background/50 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Configuración de Degradado
+                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Inicio"
+                                    color={field.value || "#000000"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`slides.${index}.customColors.gradient.to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <ColorPickerCustom
+                                    label="Color Fin"
+                                    color={field.value || "#1a1a1a"}
+                                    onChange={field.onChange}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name={`slides.${index}.customColors.gradient.via`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <ColorPickerCustom
+                                  label="Punto medio (opcional)"
+                                  color={field.value || ""}
+                                  onChange={field.onChange}
+                                />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}

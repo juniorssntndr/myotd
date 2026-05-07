@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-const HERO_GRADIENT_KEYS = ["warm-sunset", "pink-night", "rose-shadow"] as const
-const HERO_TINT_KEYS = ["warm-glow", "fuchsia-pop", "violet-haze"] as const
+const HERO_GRADIENT_KEYS = ["warm-sunset", "pink-night", "rose-shadow", "custom"] as const
+const HERO_TINT_KEYS = ["warm-glow", "fuchsia-pop", "violet-haze", "custom"] as const
 
 export const HERO_GRADIENT_OPTIONS = [
   {
@@ -21,6 +21,12 @@ export const HERO_GRADIENT_OPTIONS = [
     label: "Rose / Slate",
     className: "from-rose-800 via-slate-900 to-slate-900",
     accentClass: "text-violet-300",
+  },
+  {
+    value: "custom",
+    label: "Personalizado (HEX)",
+    className: "",
+    accentClass: "",
   },
 ] as const
 
@@ -43,6 +49,12 @@ export const HERO_TINT_OPTIONS = [
     className: "from-rose-400/60 via-violet-500/55 to-slate-500/60",
     glowClass: "from-violet-400/30 via-rose-400/20 to-transparent",
   },
+  {
+    value: "custom",
+    label: "Personalizado (HEX)",
+    className: "",
+    glowClass: "",
+  },
 ] as const
 
 type HeroGradientKey = (typeof HERO_GRADIENT_KEYS)[number]
@@ -52,24 +64,28 @@ const HERO_GRADIENT_CLASS_MAP: Record<HeroGradientKey, string> = {
   "warm-sunset": "from-red-900 via-rose-900 to-slate-900",
   "pink-night": "from-rose-900 via-pink-900 to-slate-900",
   "rose-shadow": "from-rose-800 via-slate-900 to-slate-900",
+  "custom": "",
 }
 
 const HERO_GRADIENT_ACCENT_MAP: Record<HeroGradientKey, string> = {
   "warm-sunset": "text-rose-300",
   "pink-night": "text-fuchsia-300",
   "rose-shadow": "text-violet-300",
+  "custom": "",
 }
 
 const HERO_TINT_CLASS_MAP: Record<HeroTintKey, string> = {
   "warm-glow": "from-red-500/70 via-rose-500/60 to-orange-400/50",
   "fuchsia-pop": "from-fuchsia-500/70 via-pink-500/65 to-rose-500/55",
   "violet-haze": "from-rose-400/60 via-violet-500/55 to-slate-500/60",
+  "custom": "",
 }
 
 const HERO_TINT_GLOW_MAP: Record<HeroTintKey, string> = {
   "warm-glow": "from-orange-400/30 via-rose-500/20 to-transparent",
   "fuchsia-pop": "from-fuchsia-400/30 via-pink-500/20 to-transparent",
   "violet-haze": "from-violet-400/30 via-rose-400/20 to-transparent",
+  "custom": "",
 }
 
 const LEGACY_HERO_GRADIENT_MAP: Record<string, HeroGradientKey> = {
@@ -85,10 +101,35 @@ const LEGACY_HERO_TINT_MAP: Record<string, HeroTintKey> = {
 }
 
 const gradientPresetSchema = z.enum(HERO_GRADIENT_KEYS)
-
 const tintPresetSchema = z.enum(HERO_TINT_KEYS)
 
 const clampPercentage = z.coerce.number().min(0).max(100)
+
+export const HERO_FONT_OPTIONS = [
+  { value: "font-sans", label: "Geist (Sans)" },
+  { value: "font-serif", label: "Playfair (Elegante)" },
+  { value: "font-display", label: "Montserrat (Impacto)" },
+  { value: "font-outfit", label: "Outfit (Premium)" },
+] as const
+
+const customColorPointSchema = z.object({
+  from: z.string().min(4).max(32),
+  via: z.string().min(4).max(32).optional(),
+  to: z.string().min(4).max(32),
+})
+
+const customColorsSchema = z.object({
+  useCustom: z.boolean().default(false),
+  gradient: customColorPointSchema.optional(),
+  tint: customColorPointSchema.optional(),
+})
+
+const typographySchema = z.object({
+  titleFont: z.string().default("font-sans"),
+  titleColor: z.string().min(4).max(32).default("#ffffff"),
+  subtitleColor: z.string().min(4).max(32).default("#ffffff"),
+  accentColor: z.string().min(4).max(32).optional(),
+})
 
 export const homeVisualSlideSchema = z.object({
   id: z.number().int().min(1).max(3),
@@ -104,6 +145,8 @@ export const homeVisualSlideSchema = z.object({
     (val) => val.startsWith("/") || z.string().url().safeParse(val).success,
     { message: "Debe ser una URL válida o una ruta local que empiece con /" }
   ),
+  customColors: customColorsSchema.optional(),
+  typography: typographySchema.optional(),
 })
 
 /** Para formularios admin (react-hook-form): números estrictos, sin coerce. */

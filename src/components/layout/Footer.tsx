@@ -26,7 +26,7 @@ const footerLinks = {
     { name: "Mis pedidos", href: "/profile/orders" },
     { name: "Direcciones", href: "/profile/addresses" },
     { name: "Configuración", href: "/profile/settings" },
-    { name: "Libro de reclamaciones", href: "https://www.librovirtual.pe/r/carta-oblitas-santiago-cristhian" },
+
   ],
   legal: [
     { name: "Login seguro", href: "/login" },
@@ -76,6 +76,23 @@ export function Footer() {
                   </svg>
                 </Link>
               )}
+            </div>
+            <div className="mt-8">
+              <Link 
+                href="https://www.librovirtual.pe/r/carta-oblitas-santiago-cristhian" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block bg-white p-2 rounded-md shadow-sm border border-border/40 hover:shadow-md transition-all duration-300"
+              >
+                <img 
+                  src="https://cdn.librovirtual.pe/assets/generic/libro-virtual.png?v=1778193557.7386" 
+                  alt="Libro de Reclamaciones"
+                  className="h-12 w-auto"
+                />
+              </Link>
+              <p className="mt-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                Libro de Reclamaciones
+              </p>
             </div>
           </div>
 

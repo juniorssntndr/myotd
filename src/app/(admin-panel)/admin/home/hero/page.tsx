@@ -39,8 +39,8 @@ export default function AdminHomeHeroPage() {
   const [saving, setSaving] = useState(false)
 
   const form = useForm<HeroFormValues>({
-    resolver: zodResolver(homeHeroFormSchema),
-    defaultValues: defaultHomeVisual.hero,
+    resolver: zodResolver(homeHeroFormSchema) as any,
+    defaultValues: defaultHomeVisual.hero as any,
   })
 
   useEffect(() => {

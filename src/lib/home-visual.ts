@@ -153,8 +153,15 @@ export const homeVisualSlideSchema = z.object({
     (val) => val.startsWith("/") || z.string().url().safeParse(val).success,
     { message: "Debe ser una URL válida o una ruta local que empiece con /" }
   ),
-  customColors: customColorsSchema.optional(),
-  typography: typographySchema.optional(),
+  customColors: customColorsSchema.optional().default({ useCustom: false }),
+  typography: typographySchema.optional().default({
+    titleFont: "font-sans",
+    subtitleFont: "font-sans",
+    titleSize: 60,
+    subtitleSize: 24,
+    titleColor: "#ffffff",
+    subtitleColor: "#ffffff"
+  }),
 })
 
 /** Para formularios admin (react-hook-form): números estrictos, sin coerce. */
@@ -277,6 +284,15 @@ export const defaultHomeVisual: HomeVisualSettings = {
         gradient: "warm-sunset",
         overlayTint: "warm-glow",
         image: "https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=800",
+        customColors: { useCustom: false },
+        typography: {
+          titleFont: "font-sans",
+          subtitleFont: "font-sans",
+          titleSize: 60,
+          subtitleSize: 24,
+          titleColor: "#ffffff",
+          subtitleColor: "#ffffff",
+        },
       },
       {
         id: 2,
@@ -290,6 +306,15 @@ export const defaultHomeVisual: HomeVisualSettings = {
         gradient: "pink-night",
         overlayTint: "fuchsia-pop",
         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+        customColors: { useCustom: false },
+        typography: {
+          titleFont: "font-sans",
+          subtitleFont: "font-sans",
+          titleSize: 60,
+          subtitleSize: 24,
+          titleColor: "#ffffff",
+          subtitleColor: "#ffffff",
+        },
       },
       {
         id: 3,
@@ -303,6 +328,15 @@ export const defaultHomeVisual: HomeVisualSettings = {
         gradient: "rose-shadow",
         overlayTint: "violet-haze",
         image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",
+        customColors: { useCustom: false },
+        typography: {
+          titleFont: "font-sans",
+          subtitleFont: "font-sans",
+          titleSize: 60,
+          subtitleSize: 24,
+          titleColor: "#ffffff",
+          subtitleColor: "#ffffff",
+        },
       },
     ],
   },

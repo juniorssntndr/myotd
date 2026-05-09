@@ -236,8 +236,9 @@ export function HomeSponsoredCarousel({
                           width={220}
                           height={96}
                           unoptimized
+                          draggable={false}
                           className={cn(
-                            "h-auto max-h-20 w-auto max-w-[200px] object-contain brightness-0 invert drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]",
+                            "h-auto max-h-20 w-auto max-w-[200px] object-contain brightness-0 invert drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] select-none pointer-events-none",
                             isCompactDesktop && "max-h-16 max-w-[160px]"
                           )}
                         />

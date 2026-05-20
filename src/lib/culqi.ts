@@ -84,11 +84,18 @@ type CulqiOrderResponse = {
 export async function createCulqiPayment(params: CreatePaymentParams): Promise<PaymentResult> {
   try {
     if (!CULQI_PUBLIC_KEY || !CULQI_SECRET_KEY) {
+      if (process.env.NODE_ENV === "development") {
+        return {
+          success: true,
+          checkoutUrl: buildManualConfirmationUrl(params.orderNumber),
+          requiresManualConfirmation: true,
+          error: "Culqi no configurado: se activo confirmacion manual",
+        }
+      }
+
       return {
-        success: true,
-        checkoutUrl: buildManualConfirmationUrl(params.orderNumber),
-        requiresManualConfirmation: true,
-        error: "Culqi no configurado: se activo confirmacion manual",
+        success: false,
+        error: "La pasarela de pago no está configurada. Contacta al comercio.",
       }
     }
 

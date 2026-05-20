@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,7 @@ import {
 import { InlineCreateDialog, InlineCreateButton } from "@/components/admin/InlineCreateDialog"
 import { useCategoriesStore } from "@/stores/categories-store"
 import { useBrandsStore } from "@/stores/brands-store"
+import { parseApiError } from "@/lib/parse-api-error"
 
 interface ProductVariantInput {
   id?: string
@@ -38,7 +39,7 @@ const productSchema = z.object({
   slug: z.string().min(1, "El slug es requerido"),
   description: z.string().min(1, "La descripción es requerida"),
   price: z.number().min(0, "El precio debe ser mayor a 0"),
-  comparePrice: z.number().optional(),
+  comparePrice: z.number().min(0).optional(),
   categoryId: z.string().min(1, "La categoría es requerida"),
   brandId: z.string().min(1, "La marca es requerida"),
   isNew: z.boolean(),
@@ -77,6 +78,7 @@ export default function NewProductPage() {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -208,14 +210,15 @@ export default function NewProductPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Error creating product")
+        const message = await parseApiError(response, "No se pudo crear el producto")
+        throw new Error(message)
       }
 
       toast.success("Producto guardado correctamente")
       router.push("/admin/products")
     } catch (error) {
       console.error("Error creating product:", error)
-      toast.error("No se pudo crear el producto")
+      toast.error(error instanceof Error ? error.message : "No se pudo crear el producto")
     } finally {
       setSaving(false)
     }
@@ -253,6 +256,7 @@ export default function NewProductPage() {
         </div>
       </div>
 
+      {!loading && (
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
@@ -297,18 +301,27 @@ export default function NewProductPage() {
               <div className="space-y-2">
                 <Label htmlFor="categoryId">Categoría</Label>
                 <div className="flex gap-2">
-                  <Select onValueChange={(value) => setValue("categoryId", value)}>
-                    <SelectTrigger id="categoryId" className="flex-1">
-                      <SelectValue placeholder="Seleccionar categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value || undefined}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="categoryId" className="flex-1">
+                          <SelectValue placeholder="Seleccionar categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   <InlineCreateButton onClick={() => setCategoryDialogOpen(true)} />
                 </div>
                 {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId.message}</p>}
@@ -317,18 +330,27 @@ export default function NewProductPage() {
               <div className="space-y-2">
                 <Label htmlFor="brandId">Marca</Label>
                 <div className="flex gap-2">
-                  <Select onValueChange={(value) => setValue("brandId", value)}>
-                    <SelectTrigger id="brandId" className="flex-1">
-                      <SelectValue placeholder="Seleccionar marca" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map((brand) => (
-                        <SelectItem key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="brandId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value || undefined}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="brandId" className="flex-1">
+                          <SelectValue placeholder="Seleccionar marca" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brands.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.id}>
+                              {brand.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   <InlineCreateButton onClick={() => setBrandDialogOpen(true)} />
                 </div>
                 {errors.brandId && <p className="text-sm text-destructive">{errors.brandId.message}</p>}
@@ -354,7 +376,10 @@ export default function NewProductPage() {
                 id="comparePrice"
                 type="number"
                 step="0.01"
-                {...register("comparePrice", { valueAsNumber: true })}
+                {...register("comparePrice", {
+                  setValueAs: (value) =>
+                    value === "" || value === null || value === undefined ? undefined : Number(value),
+                })}
               />
             </div>
           </CardContent>
@@ -465,6 +490,7 @@ export default function NewProductPage() {
           </Button>
         </div>
       </form>
+      )}
     </div>
   )
 }

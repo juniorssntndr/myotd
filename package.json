@@ -10,6 +10,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "npx prisma migrate deploy",
+    "db:setup": "npm run db:up && npx prisma migrate deploy && npx prisma generate && npm run db:seed",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:backfill": "npx tsx prisma/backfill-variants.ts",
     "db:studio": "npx prisma studio --port 5555 --browser none"

@@ -3,6 +3,7 @@
 import { Truck } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { CartItem } from "@/types"
+import { LegalLinks } from "@/components/legal/LegalLinks"
 import { CheckoutButton } from "./CheckoutButton"
 
 interface CartSummaryProps {
@@ -49,12 +50,14 @@ export function CartSummary({ items }: CartSummaryProps) {
       </div>
 
       <div className="mt-6">
-        <CheckoutButton items={items} />
+        <CheckoutButton items={items} total={total} />
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
         Pago seguro con Culqi (Tarjeta, Yape y Plin). Impuestos incluidos.
       </p>
+
+      <LegalLinks className="mt-3" />
     </div>
   )
 }

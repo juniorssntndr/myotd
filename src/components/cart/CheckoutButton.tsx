@@ -8,9 +8,10 @@ import type { CartItem } from "@/types"
 
 interface CheckoutButtonProps {
   items: CartItem[]
+  total?: number
 }
 
-export function CheckoutButton({ items }: CheckoutButtonProps) {
+export function CheckoutButton({ items, total }: CheckoutButtonProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
 
@@ -38,7 +39,7 @@ export function CheckoutButton({ items }: CheckoutButtonProps) {
       ) : (
         <>
           <CreditCard className="mr-2 h-4 w-4" />
-          Ir a checkout
+          {total != null ? `Pagar S/ ${total.toFixed(2)}` : "Pagar"}
         </>
       )}
     </Button>

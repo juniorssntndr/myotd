@@ -29,9 +29,9 @@ const footerLinks = {
 
   ],
   legal: [
-    { name: "Login seguro", href: "/login" },
-    { name: "Registro", href: "/register" },
-    { name: "Mi cuenta", href: "/profile" },
+    { name: "Términos y Condiciones", href: "/terminos-y-condiciones" },
+    { name: "Política de Privacidad", href: "/politica-de-privacidad" },
+    { name: "Cambios y Devoluciones", href: "/politica-de-cambios-y-devoluciones" },
   ],
 }
 

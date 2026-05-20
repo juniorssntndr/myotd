@@ -1,30 +1,18 @@
-# Skill Registry - juniorssntndr/myotd
+# Skill Registry - ECOMMERCE
 
-## Project Standards (auto-resolved)
+This file documents the conventions, rules, and skills applicable to the ECOMMERCE (myotd) project.
 
-### General Conventions
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 + OKLCH colors
-- **State**: Zustand
-- **Forms**: react-hook-form + zod
-- **Rules**:
-  - Use dedicated pages for forms, NO modals for data creation.
-  - Use Route Handlers, NO Server Actions.
-  - Prefer Clean/Hexagonal architecture.
+## Project Rules (from CLAUDE.md / AGENTS.md)
 
-### Component Structure
-- Organized by domain in `src/components/`.
-- Server components by default.
-- `use client` only when necessary for interactivity.
+1. **No Modals for Creation**: When creating new data, use dedicated pages for forms, not modal dialogs.
+2. **No Server Actions**: Use Route Handlers (API routes) instead of React Server Actions.
+3. **State Management**: Use Zustand for global state.
+4. **Forms**: Use `react-hook-form` and `zod` for forms.
+5. **Components**: Server Components by default, `"use client"` for interactivity. Use `cn()` utility for class merging.
+6. **Styling**: Tailwind CSS v4 with OKLCH color variables and `next-themes` (class strategy).
 
-## Active Skills
+## Compact Rules (auto-resolved)
 
-| Skill | Trigger | Source |
-|-------|---------|--------|
-| branch-pr | Creating a PR, opening a PR, or preparing changes for review | User Skill |
-| issue-creation | Creating a GitHub issue, reporting a bug, or requesting a feature | User Skill |
-| judgment-day | Dual adversarial review protocol | User Skill |
-| sdd-* | Spec-Driven Development phases | User Skill |
-| skill-creator | Creating new AI agent skills | User Skill |
-| skill-registry | Updating the skill registry | User Skill |
+- **Next.js & TypeScript**: Use app router, route handlers for data mutations, standard TypeScript types.
+- **Tailwind v4**: Use CSS variables in OKLCH, standard Tailwind classes, and next-themes.
+- **Form validation**: Combine `react-hook-form` and `zod`.

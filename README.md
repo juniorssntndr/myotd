@@ -94,6 +94,8 @@ src/
 
 ## Documentación
 
+- [Pruebas en local (Docker)](./docs/LOCAL-TESTING.md) - Setup y checklist para QA local
+- [Matriz QA](./docs/QA-TEST-MATRIX.md) - Casos de prueba MVP completos
 - [PRD](./docs/PRD.md) - Documento de requisitos del producto
 - [Plan](./docs/PLAN.md) - Plan de implementación
 - [Modelo de datos](./docs/DATA-MODEL.md) - Schema de base de datos

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { ShippingForm } from "@/components/checkout/ShippingForm"
 import { PaymentForm } from "@/components/checkout/PaymentForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
+import { LegalLinks } from "@/components/legal/LegalLinks"
 import { useCartStore } from "@/stores/cart-store"
 import { getShippingCost } from "@/lib/shipping"
 import type { PaymentMethod, ShippingAddress } from "@/types"
@@ -283,6 +284,11 @@ export default function CheckoutPage() {
                     placeholder="Ej: entregar en portería, referencia adicional"
                   />
                 </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Al confirmar tu pedido aceptas nuestros términos legales.
+                </p>
+                <LegalLinks className="text-left" />
               </div>
             )}
 
@@ -305,7 +311,7 @@ export default function CheckoutPage() {
                       Redirigiendo...
                     </>
                   ) : (
-                    "Confirmar y pagar"
+                    `Pagar S/ ${total.toFixed(2)}`
                   )}
                 </Button>
               )}

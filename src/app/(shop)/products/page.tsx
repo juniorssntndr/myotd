@@ -26,11 +26,15 @@ function ProductsContent() {
   // Initialize filters from URL params
   useEffect(() => {
     const category = searchParams.get("category")
+    const brand = searchParams.get("brand")
     const featured = searchParams.get("featured")
 
     const initialFilters: Partial<FilterState> = {}
     if (category) {
       initialFilters.categories = [category]
+    }
+    if (brand) {
+      initialFilters.brands = [brand]
     }
     if (featured === "true") {
       // This will be handled in the API call

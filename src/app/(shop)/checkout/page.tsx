@@ -269,7 +269,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <Script src="https://checkout.culqi.com/js/v4" strategy="lazyOnload" />
+      <Script src="https://checkout.culqi.com/js/v4" strategy="afterInteractive" />
       <div className="mb-8">
         <Button variant="ghost" asChild className="-ml-2 mb-4">
           <Link href="/cart">

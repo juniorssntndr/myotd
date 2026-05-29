@@ -21,12 +21,27 @@ interface CulqiError {
   merchant_message?: string
 }
 
-interface CulqiInstance {
+interface CulqiObject {
+  publicKey: string
+  settings: (config: {
+    title: string
+    currency: string
+    amount: number
+    order?: string
+    description?: string
+  }) => void
+  options: (config: {
+    lang?: string
+    installments?: boolean
+    modal?: boolean
+    style?: {
+      logo?: string
+      bannerColor?: string
+      buttonColor?: string
+    }
+  }) => void
   open: () => void
   close: () => void
-}
-
-interface CulqiObject {
   token?: { id: string }
   order?: unknown
   error?: CulqiError
@@ -34,7 +49,6 @@ interface CulqiObject {
 
 declare global {
   interface Window {
-    CulqiCheckout?: new (publicKey: string, config: unknown) => CulqiInstance
     culqi?: () => void
     Culqi?: CulqiObject
   }
@@ -186,31 +200,31 @@ export default function CheckoutPage() {
 
       const publicKey = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "pk_live_zBBKkaMGHua64MTr"
 
-      if (!window.CulqiCheckout) {
+      if (!window.Culqi) {
         throw new Error("El SDK de pagos de Culqi no se cargó correctamente. Reintente en unos segundos.")
       }
 
-      const culqi = new window.CulqiCheckout(publicKey, {
-        settings: {
-          title: "Myotd",
-          currency: "PEN",
-          amount: Math.round(total * 100),
-          order: data.culqiOrderId,
-        },
-        client: {
-          email: "cliente@myotd.pe",
-        },
-        options: {
-          modal: true,
-        }
+      const Culqi = window.Culqi
+      Culqi.publicKey = publicKey
+      Culqi.settings({
+        title: "Myotd",
+        currency: "PEN",
+        amount: Math.round(total * 100),
+        order: data.culqiOrderId,
+      })
+
+      Culqi.options({
+        lang: "auto",
+        installments: false,
+        modal: true,
       })
 
       window.culqi = async function () {
-        const Culqi = window.Culqi
-        if (!Culqi) return
+        const activeCulqi = window.Culqi
+        if (!activeCulqi) return
 
-        if (Culqi.token) {
-          const token = Culqi.token.id
+        if (activeCulqi.token) {
+          const token = activeCulqi.token.id
           try {
             setLoading(true)
             setError(null)
@@ -230,28 +244,28 @@ export default function CheckoutPage() {
               throw new Error(chargeData.error || "No se pudo procesar el cargo")
             }
 
-            culqi.close()
+            activeCulqi.close()
             clearCart()
             router.push(`/checkout/success?order=${data.orderNumber}`)
           } catch (chargeError) {
             console.error("Error al procesar cargo:", chargeError)
             setError(chargeError instanceof Error ? chargeError.message : "Error al procesar el cargo")
             setLoading(false)
-            culqi.close()
+            activeCulqi.close()
           }
-        } else if (Culqi.order) {
-          culqi.close()
+        } else if (activeCulqi.order) {
+          activeCulqi.close()
           clearCart()
           router.push(`/checkout/success?order=${data.orderNumber}`)
         } else {
-          console.error("Culqi error:", Culqi.error)
-          setError(Culqi.error?.user_message || Culqi.error?.merchant_message || "Error al procesar el pago con Culqi")
+          console.error("Culqi error:", activeCulqi.error)
+          setError(activeCulqi.error?.user_message || activeCulqi.error?.merchant_message || "Error al procesar el pago con Culqi")
           setLoading(false)
-          culqi.close()
+          activeCulqi.close()
         }
       }
 
-      culqi.open()
+      Culqi.open()
     } catch (checkoutError) {
       setError(
         checkoutError instanceof Error

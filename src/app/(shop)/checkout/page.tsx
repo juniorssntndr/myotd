@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import Script from "next/script"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Check, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,30 @@ import { LegalLinks } from "@/components/legal/LegalLinks"
 import { useCartStore } from "@/stores/cart-store"
 import { getShippingCost } from "@/lib/shipping"
 import type { PaymentMethod, ShippingAddress } from "@/types"
+
+interface CulqiError {
+  user_message?: string
+  merchant_message?: string
+}
+
+interface CulqiInstance {
+  open: () => void
+  close: () => void
+}
+
+interface CulqiObject {
+  token?: { id: string }
+  order?: unknown
+  error?: CulqiError
+}
+
+declare global {
+  interface Window {
+    CulqiCheckout?: new (publicKey: string, config: unknown) => CulqiInstance
+    culqi?: () => void
+    Culqi?: CulqiObject
+  }
+}
 
 const steps = [
   { id: 1, name: "Envío" },
@@ -152,12 +177,81 @@ export default function CheckoutPage() {
         throw new Error(data.error || "No se pudo iniciar el checkout")
       }
 
-      if (!data.checkoutUrl) {
-        throw new Error("La pasarela no devolvió URL de pago")
+      if (!data.culqiOrderId) {
+        // Fallback for dev or non-modal methods (transfer/cash on delivery)
+        clearCart()
+        window.location.href = data.checkoutUrl
+        return
       }
 
-      clearCart()
-      window.location.href = data.checkoutUrl
+      const publicKey = process.env.NEXT_PUBLIC_CULQI_PUBLIC_KEY || "pk_live_zBBKkaMGHua64MTr"
+
+      if (!window.CulqiCheckout) {
+        throw new Error("El SDK de pagos de Culqi no se cargó correctamente. Reintente en unos segundos.")
+      }
+
+      const culqi = new window.CulqiCheckout(publicKey, {
+        settings: {
+          title: "Myotd",
+          currency: "PEN",
+          amount: Math.round(total * 100),
+          order: data.culqiOrderId,
+        },
+        client: {
+          email: "cliente@myotd.pe",
+        },
+        options: {
+          modal: true,
+        }
+      })
+
+      window.culqi = async function () {
+        const Culqi = window.Culqi
+        if (!Culqi) return
+
+        if (Culqi.token) {
+          const token = Culqi.token.id
+          try {
+            setLoading(true)
+            setError(null)
+
+            const chargeResponse = await fetch("/api/checkout/charge", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                token,
+                orderNumber: data.orderNumber,
+              }),
+            })
+
+            const chargeData = await chargeResponse.json()
+
+            if (!chargeResponse.ok) {
+              throw new Error(chargeData.error || "No se pudo procesar el cargo")
+            }
+
+            culqi.close()
+            clearCart()
+            router.push(`/checkout/success?order=${data.orderNumber}`)
+          } catch (chargeError) {
+            console.error("Error al procesar cargo:", chargeError)
+            setError(chargeError instanceof Error ? chargeError.message : "Error al procesar el cargo")
+            setLoading(false)
+            culqi.close()
+          }
+        } else if (Culqi.order) {
+          culqi.close()
+          clearCart()
+          router.push(`/checkout/success?order=${data.orderNumber}`)
+        } else {
+          console.error("Culqi error:", Culqi.error)
+          setError(Culqi.error?.user_message || Culqi.error?.merchant_message || "Error al procesar el pago con Culqi")
+          setLoading(false)
+          culqi.close()
+        }
+      }
+
+      culqi.open()
     } catch (checkoutError) {
       setError(
         checkoutError instanceof Error
@@ -175,6 +269,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <Script src="https://checkout.culqi.com/js/v4" strategy="lazyOnload" />
       <div className="mb-8">
         <Button variant="ghost" asChild className="-ml-2 mb-4">
           <Link href="/cart">

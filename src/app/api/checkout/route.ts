@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createCulqiPayment } from "@/lib/culqi"
@@ -201,6 +201,7 @@ export async function POST(request: NextRequest) {
       checkoutUrl: culqiResult.checkoutUrl,
       orderId: created.order.id,
       orderNumber: created.order.orderNumber,
+      culqiOrderId: culqiResult.payment?.id,
     })
   } catch (error) {
     console.error("Error creating checkout:", error)

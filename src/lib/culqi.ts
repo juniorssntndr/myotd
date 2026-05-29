@@ -207,6 +207,27 @@ export async function refundPayment(paymentId: string): Promise<boolean> {
   }
 }
 
+export async function createCulqiCharge(params: {
+  amount: number
+  email: string
+  sourceId: string
+  orderNumber: string
+}) {
+  const amountInCents = Math.round(params.amount * 100)
+  return culqiRequest<{ id: string; status: string }>("/charges", {
+    method: "POST",
+    body: JSON.stringify({
+      amount: amountInCents,
+      currency_code: "PEN",
+      email: params.email,
+      source_id: params.sourceId,
+      metadata: {
+        order_number: params.orderNumber,
+      },
+    }),
+  })
+}
+
 export function getCulqiWebhookSecret(): string {
   return process.env.CULQI_WEBHOOK_SECRET || ""
 }

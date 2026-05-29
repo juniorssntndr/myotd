@@ -1,38 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import crypto from "crypto"
-
-function verifyWebhookSignature(body: string, signature: string): boolean {
-  const secret = process.env.CULQI_WEBHOOK_SECRET
-  if (!secret) return false
-
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(body)
-    .digest("hex")
-
-  if (signature.length !== expectedSignature.length) {
-    return false
-  }
-
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  )
-}
 
 export async function POST(request: NextRequest) {
   try {
+    const { searchParams } = request.nextUrl
+    const token = searchParams.get("token")
+    const secret = process.env.CULQI_WEBHOOK_SECRET
+
+    if (secret && token !== secret) {
+      return NextResponse.json({ error: "Invalid webhook token" }, { status: 401 })
+    }
+
     const body = await request.text()
-    const signature = request.headers.get("x-culqi-signature")
-
-    if (!signature) {
-      return NextResponse.json({ error: "No signature" }, { status: 400 })
-    }
-
-    if (!verifyWebhookSignature(body, signature)) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
-    }
 
     const event = JSON.parse(body)
 

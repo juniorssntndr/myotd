@@ -213,21 +213,22 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(transformProduct(product), { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating product:", error)
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        const target = Array.isArray(error.meta?.target)
-          ? (error.meta.target as string[]).join(", ")
-          : "slug o SKU"
-        return NextResponse.json(
-          { error: `Ya existe un registro con el mismo ${target}. Usa otro slug o SKU.` },
-          { status: 409 }
-        )
-      }
+    // Check for Prisma unique constraint error (P2002) robustly
+    if (error && (error.code === "P2002" || (error instanceof Error && (error as any).code === "P2002"))) {
+      const target = Array.isArray(error.meta?.target)
+        ? (error.meta.target as string[]).join(", ")
+        : "slug o SKU"
+      return NextResponse.json(
+        { error: `Ya existe un registro con el mismo ${target}. Usa otro slug o SKU.` },
+        { status: 409 }
+      )
     }
 
-    return NextResponse.json({ error: "Error al crear el producto en la base de datos" }, { status: 500 })
+    return NextResponse.json({ 
+      error: `Error al crear el producto en la base de datos: ${error?.message || error || "Error desconocido"}` 
+    }, { status: 500 })
   }
 }

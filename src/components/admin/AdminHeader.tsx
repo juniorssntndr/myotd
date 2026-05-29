@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { usePathname } from "next/navigation"
 import { Bell, Search } from "lucide-react"
 import { useNotificationStore } from "@/stores/notification-store"
@@ -40,8 +40,14 @@ export function AdminHeader({ user }: AdminHeaderProps) {
   const pathname = usePathname()
   const pageMeta = useMemo(() => getAdminPageMeta(pathname), [pathname])
 
-  const { notifications, markAllAsRead, hydrated } = useNotificationStore()
+  const { notifications, fetchNotifications, markAllAsRead, hydrated } = useNotificationStore()
   const mounted = useMemo(() => hydrated, [hydrated])
+
+  useEffect(() => {
+    if (mounted) {
+      void fetchNotifications()
+    }
+  }, [mounted, fetchNotifications])
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">

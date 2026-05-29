@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 
 export interface Notification {
-  id: number
+  id: string
   title: string
   time: string
   read?: boolean
@@ -10,33 +10,45 @@ export interface Notification {
 
 interface NotificationState {
   notifications: Notification[]
+  readIds: string[]
   hydrated: boolean
-  setNotifications: (notifications: Notification[]) => void
+  fetchNotifications: () => Promise<void>
   markAllAsRead: () => void
   setHydrated: (state: boolean) => void
 }
 
-const initialNotifications: Notification[] = [
-  { id: 1, title: "Nuevo pedido #1024", time: "Hace 5 minutos" },
-  { id: 2, title: "Nuevo usuario registrado", time: "Hace 2 horas" },
-  { id: 3, title: "Stock bajo: Nike Air Force 1", time: "Hace 5 horas" },
-]
-
 export const useNotificationStore = create<NotificationState>()(
   persist(
-    (set) => ({
-      notifications: initialNotifications,
+    (set, get) => ({
+      notifications: [],
+      readIds: [],
       hydrated: false,
-      setNotifications: (notifications) => set({ notifications }),
+      fetchNotifications: async () => {
+        try {
+          const response = await fetch("/api/admin/notifications")
+          if (!response.ok) throw new Error("Error fetching notifications")
+          const data: Notification[] = await response.json()
+          
+          const state = get()
+          const unread = data.filter((n) => !state.readIds.includes(n.id))
+          set({ notifications: unread })
+        } catch (error) {
+          console.error("Error loading notifications:", error)
+        }
+      },
       markAllAsRead: () => {
-        set({ notifications: [] });
+        const currentIds = get().notifications.map((n) => n.id)
+        set((state) => ({
+          readIds: Array.from(new Set([...state.readIds, ...currentIds])),
+          notifications: [],
+        }))
       },
       setHydrated: (state) => set({ hydrated: state }),
     }),
     {
-      name: "admin-notifications-v2",
+      name: "admin-notifications-v3",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ notifications: state.notifications }),
+      partialize: (state) => ({ readIds: state.readIds }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true)
       },

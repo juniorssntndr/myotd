@@ -77,6 +77,7 @@ interface AdminState {
   fetchOrders: (params?: { status?: string; limit?: number; offset?: number }) => Promise<void>
   fetchUsers: (params?: { role?: string; status?: string }) => Promise<void>
   updateOrderStatus: (id: string, status: string) => Promise<void>
+  deleteOrder: (id: string) => Promise<void>
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
@@ -162,6 +163,25 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       if (!response.ok) throw new Error("Error updating order")
 
       // Refresh orders after update
+      await get().fetchOrders()
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
+
+  deleteOrder: async (id) => {
+    set({ loading: true, error: null })
+    try {
+      const response = await fetch(`/api/orders/${id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || "Error deleting order")
+      }
+
+      // Refresh orders after delete
       await get().fetchOrders()
     } catch (error) {
       set({ error: (error as Error).message, loading: false })

@@ -168,3 +168,48 @@ export async function PUT(
     return NextResponse.json({ error: "Error updating order" }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const adminCheck = await requireAdmin()
+    if (adminCheck.response) {
+      return adminCheck.response
+    }
+
+    const { id } = await params
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    })
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    }
+
+    // Delete order and restore stock in a transaction if the order is not already cancelled
+    await prisma.$transaction(async (tx) => {
+      if (order.status !== "CANCELLED") {
+        for (const item of order.items) {
+          if (!item.variantId) continue
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+      }
+
+      await tx.order.delete({
+        where: { id },
+      })
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting order:", error)
+    return NextResponse.json({ error: "Error deleting order" }, { status: 500 })
+  }
+}

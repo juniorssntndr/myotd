@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { type LucideIcon, Clock3, Eye, MoreHorizontal, Search, Truck, CheckCircle2 } from "lucide-react"
+import { type LucideIcon, Clock3, Eye, MoreHorizontal, Search, Truck, CheckCircle2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -22,7 +23,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useAdminStore } from "@/stores/admin-store"
 
 const statusConfig = {
@@ -195,13 +207,27 @@ function OrdersSkeleton() {
 }
 
 export default function AdminOrdersPage() {
-  const { orders, loading, fetchOrders } = useAdminStore()
+  const { orders, loading, fetchOrders, deleteOrder } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [orderToDelete, setOrderToDelete] = useState<typeof orders[number] | null>(null)
 
   useEffect(() => {
     void fetchOrders()
   }, [fetchOrders])
+
+  const handleConfirmDelete = async () => {
+    if (!orderToDelete) return
+    try {
+      await deleteOrder(orderToDelete.id)
+      toast.success("Pedido eliminado correctamente")
+    } catch (error) {
+      console.error(error)
+      toast.error("Error al eliminar el pedido")
+    } finally {
+      setOrderToDelete(null)
+    }
+  }
 
   // Filter and search orders on client-side for fast instant responsiveness
   const filteredOrders = orders.filter((order) => {
@@ -347,6 +373,14 @@ export default function AdminOrdersPage() {
                                     Ver detalles
                                   </Link>
                                 </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setOrderToDelete(order)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Eliminar pedido
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -360,6 +394,29 @@ export default function AdminOrdersPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Confirmation Dialog for Delete */}
+      <AlertDialog open={!!orderToDelete} onOpenChange={(open) => !open && setOrderToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro de eliminar el pedido?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el pedido{" "}
+              <span className="font-semibold text-foreground">{orderToDelete?.orderNumber}</span> y se
+              restaurará el stock de los productos correspondientes si el pedido está activo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmDelete}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

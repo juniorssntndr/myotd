@@ -3,7 +3,8 @@
 import { use, useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronLeft, CreditCard, Mail, Phone, ShoppingBag, Truck, User, MapPin, FileText } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ChevronLeft, CreditCard, Mail, Phone, ShoppingBag, Truck, User, MapPin, FileText, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useAdminStore } from "@/stores/admin-store"
 
 interface PageProps {
@@ -86,10 +97,12 @@ const currencyFormatter = new Intl.NumberFormat("es-PE", {
 
 export default function OrderDetailPage({ params }: PageProps) {
   const { id } = use(params)
-  const { updateOrderStatus } = useAdminStore()
+  const router = useRouter()
+  const { updateOrderStatus, deleteOrder } = useAdminStore()
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -124,6 +137,21 @@ export default function OrderDetailPage({ params }: PageProps) {
       toast.error("Error al actualizar el estado del pedido")
     } finally {
       setUpdating(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!order) return
+    try {
+      setUpdating(true)
+      await deleteOrder(order.id)
+      toast.success("Pedido eliminado correctamente")
+      router.push("/admin/orders")
+    } catch (error) {
+      console.error(error)
+      toast.error("Error al eliminar el pedido")
+      setUpdating(false)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -208,6 +236,15 @@ export default function OrderDetailPage({ params }: PageProps) {
               <SelectItem value="CANCELLED">Cancelado</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={updating}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Eliminar Pedido
+          </Button>
         </div>
       </div>
 
@@ -379,6 +416,30 @@ export default function OrderDetailPage({ params }: PageProps) {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Dialog for Delete */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro de eliminar el pedido?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el pedido{" "}
+              <span className="font-semibold text-foreground">{order?.orderNumber}</span>, sus
+              artículos asociados y se restaurará el stock de los productos si el pedido está activo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updating}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmDelete}
+              disabled={updating}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

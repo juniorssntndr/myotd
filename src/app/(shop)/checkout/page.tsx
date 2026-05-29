@@ -96,11 +96,13 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Check empty cart only on mount to prevent race condition when cart is cleared after checkout success
   useEffect(() => {
-    if (items.length === 0) {
+    const cartItems = useCartStore.getState().items
+    if (cartItems.length === 0) {
       router.replace("/cart")
     }
-  }, [items.length, router])
+  }, [router])
 
   const subtotal = useMemo(
     () => items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),

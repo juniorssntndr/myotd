@@ -6,6 +6,7 @@ import {
   Package,
   Percent,
   Settings,
+  ShoppingCart,
   Sparkles,
   Store,
   Users,
@@ -54,6 +55,12 @@ export const adminNavigationSections: AdminNavigationSection[] = [
         href: "/admin",
         icon: LayoutDashboard,
         description: "Métricas, pedidos y performance.",
+      },
+      {
+        name: "Pedidos",
+        href: "/admin/orders",
+        icon: ShoppingCart,
+        description: "Gestión de pedidos y logística.",
       },
       {
         name: "Catálogo",

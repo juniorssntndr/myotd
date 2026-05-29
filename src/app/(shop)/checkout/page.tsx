@@ -245,7 +245,6 @@ export default function CheckoutPage() {
             }
 
             activeCulqi.close()
-            clearCart()
             router.push(`/checkout/success?order=${data.orderNumber}`)
           } catch (chargeError) {
             console.error("Error al procesar cargo:", chargeError)
@@ -255,7 +254,6 @@ export default function CheckoutPage() {
           }
         } else if (activeCulqi.order) {
           activeCulqi.close()
-          clearCart()
           router.push(`/checkout/success?order=${data.orderNumber}`)
         } else {
           console.error("Culqi error:", activeCulqi.error)

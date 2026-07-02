@@ -274,7 +274,7 @@ export default function OrderDetailPage({ params }: PageProps) {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold truncate text-foreground">{item.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Marca: {item.brand} | Talla: {item.size} | Color: {item.color}
+                      {[`Marca: ${item.brand}`, item.size ? `Talla: ${item.size}` : null, `Color: ${item.color}`].filter(Boolean).join(" | ")}
                     </p>
                     <p className="text-xs font-mono text-muted-foreground mt-0.5">
                       SKU: {item.sku || "N/A"}

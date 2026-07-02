@@ -45,7 +45,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/myotd-logo.png" alt="Myotd" width={170} height={60} className="h-12 w-auto shrink-0" />
+              <Image src="/myotd-logo.svg" alt="Myotd" width={170} height={170} className="h-12 w-auto shrink-0" />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
               {general.storeDescription || "Moda urbana multimarca para Perú. Envíos a todo el Perú • Wholesale disponible"}

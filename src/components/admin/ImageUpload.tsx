@@ -159,7 +159,7 @@ export function ImageUpload({ value = [], onChange, maxImages = 5 }: ImageUpload
                 Arrastra imágenes aquí o haz clic para seleccionar
               </p>
               <p className="text-xs text-muted-foreground">
-                JPG, PNG, WebP o GIF (máx. 5MB)
+                JPG, PNG o WebP (máx. 5MB)
               </p>
               <p className="text-xs text-muted-foreground">
                 {value.length} de {maxImages} imágenes
@@ -168,7 +168,7 @@ export function ImageUpload({ value = [], onChange, maxImages = 5 }: ImageUpload
           )}
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={(e) => handleUpload(e.target.files)}
             className="absolute inset-0 cursor-pointer opacity-0"

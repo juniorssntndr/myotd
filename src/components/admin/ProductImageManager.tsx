@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { ArrowLeft, ArrowRight, ImagePlus, Trash2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, ImagePlus, Loader2, Trash2, Upload } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ export function ProductImageManager({
   maxImages = 5,
 }: ProductImageManagerProps) {
   const [touched, setTouched] = useState<Record<number, boolean>>({})
+  const [uploading, setUploading] = useState(false)
 
   const addImage = () => {
     if (value.length >= maxImages) return
@@ -32,13 +34,54 @@ export function ProductImageManager({
   }
 
   const removeImage = (index: number) => {
+    const image = value[index]
     const next = value.filter((_, imageIndex) => imageIndex !== index)
     onChange(next)
+    if (image?.startsWith("/uploads/products/")) {
+      fetch(`/api/uploads?path=${encodeURIComponent(image)}`, { method: "DELETE" }).catch(() => {
+        toast.error("No se pudo eliminar el archivo local")
+      })
+    }
     setTouched((prev) => {
       const nextTouched = { ...prev }
       delete nextTouched[index]
       return nextTouched
     })
+  }
+
+  const uploadFiles = async (files: FileList | File[]) => {
+    const selectedFiles = Array.from(files).slice(0, Math.max(0, maxImages - value.length))
+    if (selectedFiles.length === 0) return
+
+    setUploading(true)
+    try {
+      const uploadedPaths: string[] = []
+
+      for (const file of selectedFiles) {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch("/api/uploads", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || "No se pudo subir la imagen")
+        }
+
+        const data = await response.json()
+        uploadedPaths.push(data.path)
+      }
+
+      onChange([...value.filter((image) => image.trim().length > 0), ...uploadedPaths].slice(0, maxImages))
+      toast.success(selectedFiles.length === 1 ? "Imagen subida" : "Imágenes subidas")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo subir la imagen")
+    } finally {
+      setUploading(false)
+    }
   }
 
   const moveImage = (index: number, direction: "left" | "right") => {
@@ -51,11 +94,36 @@ export function ProductImageManager({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
-        <p>
-          Pegá la <strong>URL completa</strong> del asset o solo el <strong>path Imgix</strong>
-          (ej. <code>nikeshoes/foto.jpg</code>). La primera imagen se usa como portada del producto.
-        </p>
+      <div
+        className="rounded-lg border border-dashed border-border/70 bg-muted/20 p-4 text-sm text-muted-foreground"
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault()
+          uploadFiles(event.dataTransfer.files)
+        }}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Subí imágenes JPG, PNG o WebP de hasta 5MB. Se optimizan automáticamente al subirlas.
+            También podés conservar URLs existentes o paths Imgix.
+          </p>
+          <Button type="button" variant="outline" disabled={uploading || value.length >= maxImages} asChild>
+            <Label className="cursor-pointer">
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              Subir imagen
+              <Input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  if (event.target.files) uploadFiles(event.target.files)
+                  event.target.value = ""
+                }}
+              />
+            </Label>
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">

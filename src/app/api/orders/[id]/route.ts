@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { requireAdmin } from "@/lib/api-auth"
 import { resolveProductImageUrl } from "@/lib/image-url"
+import { displayVariantSize } from "@/lib/product-options"
 
 type Params = Promise<{ id: string }>
 type OrderStatus = "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"
@@ -88,7 +89,7 @@ export async function GET(
         variantId: item.variantId,
         name: item.name,
         brand: item.product.brand.name,
-        size: item.variant?.size || "",
+        size: displayVariantSize(item.variant?.size),
         color: item.variant?.color || "",
         sku: item.variant?.sku || "",
         price: Number(item.price),

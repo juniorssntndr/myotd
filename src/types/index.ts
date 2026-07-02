@@ -49,6 +49,7 @@ export interface Product {
   description: string
   variants: ProductVariant[]
   sizes: string[]
+  requiresSize: boolean
   colors: string[]
   isNew: boolean
   isFeatured: boolean

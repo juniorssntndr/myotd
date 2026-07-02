@@ -3,6 +3,7 @@
 .next
 node_modules
 npm-debug.log*
+uploads
 Dockerfile*
 docker-compose*.yml
 .env

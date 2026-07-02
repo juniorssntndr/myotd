@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { transformProduct } from "@/lib/transformers"
 import { requireAdmin } from "@/lib/api-auth"
 import { normalizeProductImageList } from "@/lib/image-url"
+import { NO_SIZE_VALUE } from "@/lib/product-options"
 
 type Params = Promise<{ id: string }>
 
@@ -27,6 +28,16 @@ type ProductUpdateInput = {
   categoryId?: string
   brandId?: string
   variants?: ProductVariantInput[]
+  noSize?: boolean
+}
+
+function normalizeVariants(variants: ProductVariantInput[], noSize: boolean) {
+  return variants.map((variant) => ({
+    ...variant,
+    size: noSize ? NO_SIZE_VALUE : variant.size?.trim() || "",
+    color: variant.color?.trim() || "",
+    sku: variant.sku?.trim() || "",
+  }))
 }
 
 export async function GET(
@@ -78,6 +89,21 @@ export async function PUT(
       )
     }
 
+    const normalizedVariants = Array.isArray(body.variants)
+      ? normalizeVariants(body.variants, Boolean(body.noSize))
+      : undefined
+
+    if (normalizedVariants?.some((variant) => !variant.sku || !variant.size || !variant.color || Number.isNaN(Number(variant.stock)))) {
+      return NextResponse.json(
+        {
+          error: body.noSize
+            ? "Todas las variantes deben incluir sku, color y stock"
+            : "Todas las variantes deben incluir sku, talla, color y stock",
+        },
+        { status: 400 }
+      )
+    }
+
     const existing = await prisma.product.findUnique({
       where: { id },
       include: { variants: true },
@@ -105,13 +131,13 @@ export async function PUT(
         },
       })
 
-      if (Array.isArray(body.variants) && body.variants.length > 0) {
+      if (normalizedVariants && normalizedVariants.length > 0) {
         const existingIds = new Set(existing.variants.map((variant) => variant.id))
         const incomingById = new Map(
-          body.variants.filter((variant) => Boolean(variant.id)).map((variant) => [variant.id as string, variant])
+          normalizedVariants.filter((variant) => Boolean(variant.id)).map((variant) => [variant.id as string, variant])
         )
         const incomingIds = new Set(
-          body.variants
+          normalizedVariants
             .map((variant) => variant.id)
             .filter((variantId): variantId is string => Boolean(variantId))
         )
@@ -131,7 +157,7 @@ export async function PUT(
           }
         }
 
-        const newVariants = body.variants.filter((variant) => !variant.id)
+        const newVariants = normalizedVariants.filter((variant) => !variant.id)
         if (newVariants.length > 0) {
           await tx.productVariant.createMany({
             data: newVariants.map((variant) => ({

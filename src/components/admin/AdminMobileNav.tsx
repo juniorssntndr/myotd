@@ -32,7 +32,7 @@ export function AdminMobileNav() {
       <SheetContent side="left" className="w-64 p-0">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle className="flex items-center gap-2">
-            <Image src="/myotd-logo.png" alt="Myotd" width={130} height={46} className="h-9 w-auto" />
+            <Image src="/myotd-logo.svg" alt="Myotd" width={130} height={130} className="h-9 w-auto" />
             Admin Panel
           </SheetTitle>
         </SheetHeader>

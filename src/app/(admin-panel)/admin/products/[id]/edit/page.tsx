@@ -22,6 +22,7 @@ import {
 import { InlineCreateDialog, InlineCreateButton } from "@/components/admin/InlineCreateDialog"
 import { useCategoriesStore } from "@/stores/categories-store"
 import { useBrandsStore } from "@/stores/brands-store"
+import { NO_SIZE_VALUE, isNoSizeValue } from "@/lib/product-options"
 
 type VariantInput = {
   id?: string
@@ -59,6 +60,7 @@ export default function EditProductPage() {
   const [product, setProduct] = useState<ProductInput | null>(null)
   const [categoryId, setCategoryId] = useState("")
   const [brandId, setBrandId] = useState("")
+  const [noSize, setNoSize] = useState(false)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [brandDialogOpen, setBrandDialogOpen] = useState(false)
 
@@ -80,6 +82,7 @@ export default function EditProductPage() {
 
         setCategoryId(productData.categoryId || "")
         setBrandId(productData.brandId || "")
+        setNoSize(!productData.requiresSize)
 
         if (!productData.variants) {
           productData.variants = []
@@ -197,7 +200,7 @@ export default function EditProductPage() {
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 4)
-    const sizeCode = size.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const sizeCode = (size || NO_SIZE_VALUE).toUpperCase().replace(/[^A-Z0-9]/g, "") || "OS"
     const colorCode = color.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4)
     const uniqueSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
     return `${prefix}-${sizeCode}-${colorCode}-${uniqueSuffix}`
@@ -205,6 +208,9 @@ export default function EditProductPage() {
 
   const handleSubmit = async () => {
     if (!product) return
+
+    const selectedCategory = categories.find((category) => category.id === categoryId)
+    const effectiveNoSize = noSize || selectedCategory?.slug === "accesorios"
 
     if (!categoryId) {
       toast.error("Debes seleccionar una categoría")
@@ -216,9 +222,9 @@ export default function EditProductPage() {
       return
     }
 
-    const incompleteVariants = product.variants.filter((v) => !v.size || !v.color)
+    const incompleteVariants = product.variants.filter((v) => (!effectiveNoSize && !v.size) || !v.color)
     if (incompleteVariants.length > 0) {
-      toast.error("Todas las variantes deben tener talla y color")
+      toast.error(effectiveNoSize ? "Todas las variantes deben tener color" : "Todas las variantes deben tener talla y color")
       return
     }
 
@@ -239,7 +245,8 @@ export default function EditProductPage() {
     try {
       const variantsWithSku = product.variants.map((v) => ({
         ...v,
-        sku: v.sku || generateSku(product.name, v.size, v.color),
+        size: effectiveNoSize ? NO_SIZE_VALUE : v.size,
+        sku: v.sku || generateSku(product.name, effectiveNoSize ? NO_SIZE_VALUE : v.size, v.color),
       }))
 
       const response = await fetch(`/api/products/${product.id}`, {
@@ -258,6 +265,7 @@ export default function EditProductPage() {
           isFeatured: product.isFeatured,
           isActive: product.isActive,
           variants: variantsWithSku,
+          noSize: effectiveNoSize,
         }),
       })
 
@@ -308,7 +316,7 @@ export default function EditProductPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Editar producto</h1>
-          <p className="text-muted-foreground">Ajusta datos, variantes y stock por talla/color</p>
+          <p className="text-muted-foreground">Ajusta datos, variantes y stock del producto</p>
         </div>
       </div>
 
@@ -404,21 +412,33 @@ export default function EditProductPage() {
         <Card>
           <CardHeader>
             <CardTitle>Variantes</CardTitle>
-            <CardDescription>Gestión de stock por talla/color</CardDescription>
+            <CardDescription>{noSize ? "Gestión de stock por color" : "Gestión de stock por talla/color"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="hidden sm:grid sm:grid-cols-3 gap-2 px-1 text-sm font-medium text-muted-foreground">
-              <span>Talla</span>
+            <div className="flex items-center space-x-2 rounded-md border p-3">
+              <Checkbox
+                id="edit-no-size"
+                checked={noSize}
+                onCheckedChange={(checked) => setNoSize(Boolean(checked))}
+              />
+              <Label htmlFor="edit-no-size" className="font-normal">
+                Producto sin talla
+              </Label>
+            </div>
+            <div className={`hidden gap-2 px-1 text-sm font-medium text-muted-foreground sm:grid ${noSize ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+              {!noSize ? <span>Talla</span> : null}
               <span>Color</span>
               <span>Stock</span>
             </div>
             {product.variants.map((variant, index) => (
-              <div key={variant.id || `variant-${index}`} className="grid gap-2 rounded-md border p-3 sm:grid-cols-3">
-                <Input
-                  placeholder="Talla (S, M, 42...)"
-                  value={variant.size}
-                  onChange={(event) => updateVariant(index, "size", event.target.value)}
-                />
+              <div key={variant.id || `variant-${index}`} className={`grid gap-2 rounded-md border p-3 ${noSize ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                {!noSize ? (
+                  <Input
+                    placeholder="Talla (S, M, 42...)"
+                    value={isNoSizeValue(variant.size) ? "" : variant.size}
+                    onChange={(event) => updateVariant(index, "size", event.target.value)}
+                  />
+                ) : null}
                 <Input
                   placeholder="Color (Negro, Blanco...)"
                   value={variant.color}
@@ -452,7 +472,7 @@ export default function EditProductPage() {
           <CardHeader>
             <CardTitle>Imágenes</CardTitle>
             <CardDescription>
-              Pega URLs completas o paths de Imgix. La primera imagen se usa como portada del catálogo.
+              Sube imágenes locales optimizadas o conserva URLs existentes. La primera imagen se usa como portada del catálogo.
             </CardDescription>
           </CardHeader>
           <CardContent>

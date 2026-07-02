@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Prisma } from "@/generated/client"
 import { prisma } from "@/lib/prisma"
 import { transformProduct } from "@/lib/transformers"
 import { requireAdmin } from "@/lib/api-auth"
 import { normalizeProductImageList } from "@/lib/image-url"
+import { NO_SIZE_VALUE } from "@/lib/product-options"
 
 type ProductVariantInput = {
   id?: string
@@ -26,6 +26,16 @@ type ProductInput = {
   categoryId: string
   brandId: string
   variants: ProductVariantInput[]
+  noSize?: boolean
+}
+
+function normalizeVariants(variants: ProductVariantInput[], noSize: boolean) {
+  return variants.map((variant) => ({
+    ...variant,
+    size: noSize ? NO_SIZE_VALUE : variant.size?.trim() || "",
+    color: variant.color?.trim() || "",
+    sku: variant.sku?.trim() || "",
+  }))
 }
 
 function normalizeSort(sortBy: string) {
@@ -42,7 +52,7 @@ function normalizeSort(sortBy: string) {
   }
 }
 
-function validateProductInput(body: ProductInput): string | null {
+function validateProductInput(body: ProductInput, variants: ProductVariantInput[]): string | null {
   if (!body.name || !body.slug || !body.categoryId || !body.brandId) {
     return "name, slug, categoryId y brandId son requeridos"
   }
@@ -51,15 +61,25 @@ function validateProductInput(body: ProductInput): string | null {
     return "Debes registrar al menos una variante"
   }
 
-  const invalidVariant = body.variants.find(
+  const invalidVariant = variants.find(
     (variant) => !variant.sku || !variant.size || !variant.color || Number.isNaN(Number(variant.stock))
   )
 
   if (invalidVariant) {
-    return "Todas las variantes deben incluir sku, talla, color y stock"
+    return body.noSize
+      ? "Todas las variantes deben incluir sku, color y stock"
+      : "Todas las variantes deben incluir sku, talla, color y stock"
   }
 
   return null
+}
+
+function isUniqueConstraintError(error: unknown): error is { code: string; meta?: { target?: unknown } } {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002"
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error || "Error desconocido")
 }
 
 export async function GET(request: NextRequest) {
@@ -173,7 +193,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body: ProductInput = await request.json()
-    const validationError = validateProductInput(body)
+    const normalizedVariants = normalizeVariants(body.variants || [], Boolean(body.noSize))
+    const validationError = validateProductInput(body, normalizedVariants)
 
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 })
@@ -197,7 +218,7 @@ export async function POST(request: NextRequest) {
         categoryId: body.categoryId,
         brandId: body.brandId,
         variants: {
-          create: body.variants.map((variant) => ({
+          create: normalizedVariants.map((variant) => ({
             sku: variant.sku,
             size: variant.size,
             color: variant.color,
@@ -213,13 +234,13 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(transformProduct(product), { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating product:", error)
 
     // Check for Prisma unique constraint error (P2002) robustly
-    if (error && (error.code === "P2002" || (error instanceof Error && (error as any).code === "P2002"))) {
+    if (isUniqueConstraintError(error)) {
       const target = Array.isArray(error.meta?.target)
-        ? (error.meta.target as string[]).join(", ")
+        ? error.meta.target.join(", ")
         : "slug o SKU"
       return NextResponse.json(
         { error: `Ya existe un registro con el mismo ${target}. Usa otro slug o SKU.` },
@@ -228,7 +249,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ 
-      error: `Error al crear el producto en la base de datos: ${error?.message || error || "Error desconocido"}` 
+      error: `Error al crear el producto en la base de datos: ${getErrorMessage(error)}` 
     }, { status: 500 })
   }
 }

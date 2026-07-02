@@ -1,4 +1,5 @@
 import type { Brand, Category, Product, ProductVariant } from "@/types"
+import { productRequiresSize } from "@/lib/product-options"
 
 const now = new Date().toISOString()
 
@@ -86,7 +87,7 @@ function createVariants(
   )
 }
 
-type ProductSeedInput = Omit<Product, "brandId" | "categoryId" | "createdAt" | "updatedAt"> & {
+type ProductSeedInput = Omit<Product, "brandId" | "categoryId" | "createdAt" | "updatedAt" | "requiresSize"> & {
   category: string
   brand: string
 }
@@ -103,6 +104,7 @@ function createProduct(input: ProductSeedInput): Product {
     ...input,
     categoryId: category.id,
     brandId: brand.id,
+    requiresSize: productRequiresSize(input.category, input.sizes),
     createdAt: now,
     updatedAt: now,
   }

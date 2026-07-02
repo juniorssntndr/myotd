@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/api-auth"
 import { resolveProductImageUrl } from "@/lib/image-url"
+import { displayVariantSize } from "@/lib/product-options"
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
       },
       items: order.items.map((item: typeof order.items[number]) => ({
         name: item.name,
-        size: item.variant?.size || "",
+        size: displayVariantSize(item.variant?.size),
         color: item.variant?.color || "",
         sku: item.variant?.sku || "",
         quantity: item.quantity,

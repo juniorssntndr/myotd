@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { type Resolver, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { ArrowLeft, Loader2 } from "lucide-react"
@@ -39,8 +39,8 @@ export default function AdminHomeHeroPage() {
   const [saving, setSaving] = useState(false)
 
   const form = useForm<HeroFormValues>({
-    resolver: zodResolver(homeHeroFormSchema) as any,
-    defaultValues: defaultHomeVisual.hero as any,
+    resolver: zodResolver(homeHeroFormSchema) as unknown as Resolver<HeroFormValues>,
+    defaultValues: defaultHomeVisual.hero as HeroFormValues,
   })
 
   useEffect(() => {

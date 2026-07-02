@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/api-auth"
+import { displayVariantSize } from "@/lib/product-options"
 
 interface NotificationItem {
   id: string
@@ -89,9 +90,12 @@ export async function GET() {
 
     // Compile low stock variants
     lowStockVariants.forEach((variant) => {
+      const variantSize = displayVariantSize(variant.size)
+      const variantLabel = [variantSize, variant.color].filter(Boolean).join(" / ")
+
       notifications.push({
         id: `stock-${variant.id}`,
-        title: `Stock bajo: ${variant.product.name} (${variant.size} / ${variant.color})`,
+        title: `Stock bajo: ${variant.product.name}${variantLabel ? ` (${variantLabel})` : ""}`,
         time: `Solo quedan ${variant.stock} unidades`,
         // Default to a date, if we don't have update history we can use current date minus some hours or static date
         date: new Date(), 

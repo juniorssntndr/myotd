@@ -18,7 +18,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || "")
-  const [selectedSize, setSelectedSize] = useState<string>("")
+  const [selectedSize, setSelectedSize] = useState<string>(product.requiresSize ? "" : product.sizes[0] || "")
   const addItem = useCartStore((state) => state.addItem)
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
@@ -27,9 +27,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
     : 0
 
   const selectedVariant = useMemo(() => {
-    if (!selectedColor || !selectedSize) return null
-    return product.variants.find((v) => v.color === selectedColor && v.size === selectedSize) || null
-  }, [product.variants, selectedColor, selectedSize])
+    if (!selectedColor) return null
+    return product.variants.find((v) => {
+      if (v.color !== selectedColor) return false
+      return product.requiresSize ? v.size === selectedSize : true
+    }) || null
+  }, [product.requiresSize, product.variants, selectedColor, selectedSize])
 
   const totalStock = useMemo(() => {
     return product.variants.reduce((sum, v) => sum + v.stock, 0)
@@ -62,7 +65,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
   const handleColorSelect = (color: string) => {
     setSelectedColor(color)
-    setSelectedSize("")
+    if (product.requiresSize) setSelectedSize("")
     setQuantity(1)
   }
 
@@ -134,7 +137,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           </div>
 
-          {selectedColor && (
+          {product.requiresSize && selectedColor && (
             <div>
               <h3 className="mb-3 font-medium">Talla</h3>
               <div className="flex flex-wrap gap-2">
@@ -223,7 +226,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             disabled={!canAddToCart || added}
             onClick={handleAddToCart}
           >
-            {!selectedSize ? (
+            {product.requiresSize && !selectedSize ? (
               "Selecciona talla"
             ) : added ? (
               <>

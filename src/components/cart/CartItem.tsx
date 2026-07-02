@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CartItem as CartItemType } from "@/types"
+import { displayVariantSize } from "@/lib/product-options"
 
 interface CartItemProps {
   item: CartItemType
@@ -16,7 +17,8 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const { product, variantId, quantity } = item
 
   const variant = product.variants.find((v) => v.id === variantId)
-  const variantLabel = variant ? `${variant.size} / ${variant.color}` : ""
+  const variantSize = displayVariantSize(variant?.size)
+  const variantLabel = variant ? [variantSize, variant.color].filter(Boolean).join(" / ") : ""
 
   return (
     <div className="flex gap-4 py-4">

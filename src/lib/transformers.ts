@@ -6,6 +6,7 @@ import type {
   ProductVariant,
 } from "@/generated/client"
 import { resolveProductImageList } from "@/lib/image-url"
+import { productRequiresSize, visibleProductSizes } from "@/lib/product-options"
 
 type ProductWithRelations = PrismaProduct & {
   category: PrismaCategory
@@ -19,11 +20,13 @@ type CategoryWithCount = PrismaCategory & {
 
 type BrandWithCount = PrismaBrand & {
   _count?: { products: number }
-  products?: { images: string[] | any }[]
+  products?: { images: string[] }[]
 }
 
 export function transformProduct(product: ProductWithRelations): Product {
-  const sizes = [...new Set(product.variants?.map((v) => v.size) || [])]
+  const rawSizes = [...new Set(product.variants?.map((v) => v.size) || [])]
+  const requiresSize = productRequiresSize(product.category.slug, rawSizes)
+  const sizes = visibleProductSizes(product.category.slug, rawSizes)
   const colors = [...new Set(product.variants?.map((v) => v.color) || [])]
   const specs = (product.specs as Record<string, unknown> | null) || {}
   const shortDescription =
@@ -50,6 +53,7 @@ export function transformProduct(product: ProductWithRelations): Product {
       stock: v.stock,
     })) || [],
     sizes,
+    requiresSize,
     colors,
     isNew: product.isNew,
     isFeatured: product.isFeatured,

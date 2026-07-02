@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma"
 import { transformBrand } from "@/lib/transformers"
 import { requireAdmin } from "@/lib/api-auth"
 
+function isConnectionError(error: unknown) {
+  if (!(error instanceof Error)) return false
+  const code = "code" in error ? error.code : undefined
+  return code === "ECONNREFUSED" || error.message.includes("connection")
+}
+
 export async function GET() {
   try {
     // Intentamos obtener las marcas con información del catálogo para previsualización
@@ -26,11 +32,11 @@ export async function GET() {
     })
 
     return NextResponse.json(brands.map(transformBrand))
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching brands:", error)
     
     // Si es un error de conexión, devolvemos un mensaje más útil
-    if (error.code === 'ECONNREFUSED' || error.message?.includes('connection')) {
+    if (isConnectionError(error)) {
       return NextResponse.json(
         { error: "Error de conexión con la base de datos. Verifique que el servicio PostgreSQL esté activo." },
         { status: 503 }
@@ -73,8 +79,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(transformBrand(brand as any), { status: 201 })
-  } catch (error: any) {
+    return NextResponse.json(transformBrand(brand), { status: 201 })
+  } catch (error: unknown) {
     console.error("Error creating brand:", error)
     return NextResponse.json(
       { error: "Error al crear la marca" },

@@ -16,7 +16,7 @@ export function AdminSidebar() {
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r bg-card">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <Image src="/myotd-logo.png" alt="Myotd" width={130} height={46} className="h-9 w-auto shrink-0" />
+        <Image src="/myotd-logo.svg" alt="Myotd" width={130} height={130} className="h-9 w-auto shrink-0" />
         <span className="font-bold">Admin Panel</span>
       </div>
 

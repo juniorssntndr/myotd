@@ -26,6 +26,7 @@ import { InlineCreateDialog, InlineCreateButton } from "@/components/admin/Inlin
 import { useCategoriesStore } from "@/stores/categories-store"
 import { useBrandsStore } from "@/stores/brands-store"
 import { parseApiError } from "@/lib/parse-api-error"
+import { NO_SIZE_VALUE } from "@/lib/product-options"
 
 interface ProductVariantInput {
   id?: string
@@ -62,6 +63,7 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<string[]>([])
   const [variants, setVariants] = useState<ProductVariantInput[]>([{ ...EMPTY_VARIANT }])
+  const [noSize, setNoSize] = useState(false)
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [brandDialogOpen, setBrandDialogOpen] = useState(false)
 
@@ -88,6 +90,15 @@ export default function NewProductPage() {
     },
   })
 
+  const selectedCategoryId = watch("categoryId")
+
+  useEffect(() => {
+    const selectedCategory = categories.find((category) => category.id === selectedCategoryId)
+    if (selectedCategory?.slug === "accesorios") {
+      setNoSize(true)
+    }
+  }, [categories, selectedCategoryId])
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -102,7 +113,7 @@ export default function NewProductPage() {
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 4)
-    const sizeCode = size.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const sizeCode = (size || NO_SIZE_VALUE).toUpperCase().replace(/[^A-Z0-9]/g, "") || "OS"
     const colorCode = color.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4)
     return `${prefix}-${sizeCode}-${colorCode}`
   }
@@ -175,14 +186,14 @@ export default function NewProductPage() {
       return
     }
 
-    const incompleteVariants = variants.filter((v) => !v.size || !v.color)
+    const incompleteVariants = variants.filter((v) => (!noSize && !v.size) || !v.color)
     if (incompleteVariants.length > 0) {
-      toast.error("Todas las variantes deben tener talla y color")
+      toast.error(noSize ? "Todas las variantes deben tener color" : "Todas las variantes deben tener talla y color")
       return
     }
 
     const validVariants = variants.filter(
-      (variant) => variant.size && variant.color && variant.stock >= 0
+      (variant) => (noSize || variant.size) && variant.color && variant.stock >= 0
     )
 
     if (validVariants.length === 0) {
@@ -192,7 +203,8 @@ export default function NewProductPage() {
 
     const variantsWithSku = validVariants.map((v) => ({
       ...v,
-      sku: generateSku(data.name, v.size, v.color),
+      size: noSize ? NO_SIZE_VALUE : v.size,
+      sku: generateSku(data.name, noSize ? NO_SIZE_VALUE : v.size, v.color),
     }))
 
     setSaving(true)
@@ -205,6 +217,7 @@ export default function NewProductPage() {
           ...data,
           images,
           variants: variantsWithSku,
+          noSize,
           isActive: true,
         }),
       })
@@ -388,21 +401,35 @@ export default function NewProductPage() {
         <Card>
           <CardHeader>
             <CardTitle>Variantes</CardTitle>
-            <CardDescription>Talla, color y stock por combinación</CardDescription>
+            <CardDescription>
+              {noSize ? "Color y stock por variante" : "Talla, color y stock por combinación"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="hidden sm:grid sm:grid-cols-3 gap-2 px-1 text-sm font-medium text-muted-foreground">
-              <span>Talla</span>
+            <div className="flex items-center space-x-2 rounded-md border p-3">
+              <Checkbox
+                id="no-size"
+                checked={noSize}
+                onCheckedChange={(checked) => setNoSize(Boolean(checked))}
+              />
+              <Label htmlFor="no-size" className="font-normal">
+                Producto sin talla
+              </Label>
+            </div>
+            <div className={`hidden gap-2 px-1 text-sm font-medium text-muted-foreground sm:grid ${noSize ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+              {!noSize ? <span>Talla</span> : null}
               <span>Color</span>
               <span>Stock</span>
             </div>
             {variants.map((variant, index) => (
-              <div key={`variant-${index}`} className="grid gap-2 rounded-md border p-3 sm:grid-cols-3">
-                <Input
-                  placeholder="Talla (S, M, 42...)"
-                  value={variant.size}
-                  onChange={(event) => updateVariant(index, "size", event.target.value)}
-                />
+              <div key={`variant-${index}`} className={`grid gap-2 rounded-md border p-3 ${noSize ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                {!noSize ? (
+                  <Input
+                    placeholder="Talla (S, M, 42...)"
+                    value={variant.size}
+                    onChange={(event) => updateVariant(index, "size", event.target.value)}
+                  />
+                ) : null}
                 <Input
                   placeholder="Color (Negro, Blanco...)"
                   value={variant.color}
@@ -436,7 +463,7 @@ export default function NewProductPage() {
           <CardHeader>
             <CardTitle>Imágenes</CardTitle>
             <CardDescription>
-              Pega URLs completas o paths de Imgix. La primera imagen será la portada del catálogo.
+              Sube imágenes locales optimizadas o conserva URLs existentes. La primera imagen será la portada del catálogo.
             </CardDescription>
           </CardHeader>
           <CardContent>

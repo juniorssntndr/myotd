@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { CartItem } from "@/types"
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping"
+import { displayVariantSize } from "@/lib/product-options"
 
 interface OrderSummaryProps {
   items: CartItem[]
@@ -47,9 +48,12 @@ export function OrderSummary({ items, subtotal, shippingCost }: OrderSummaryProp
                 const variant = item.product.variants.find((v) => v.id === item.variantId)
                 if (!variant) return null
 
+                const size = displayVariantSize(variant.size)
+                const parts = [size ? `Talla: ${size}` : null, `Color: ${variant.color}`].filter(Boolean)
+
                 return (
                   <p className="text-xs text-muted-foreground">
-                    Talla: {variant.size} | Color: {variant.color}
+                    {parts.join(" | ")}
                   </p>
                 )
               })()}

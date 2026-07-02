@@ -101,7 +101,14 @@ export async function POST(request: NextRequest) {
       0
     )
 
-    const shippingCost = getShippingCost(shippingAddress.district, subtotal)
+    const settings = await prisma.storeSettings.findUnique({
+      where: { id: "singleton" },
+      select: { standardShippingCost: true, freeShippingThreshold: true },
+    })
+    const shippingCost = getShippingCost(shippingAddress.district, subtotal, {
+      standardShippingCost: settings ? Number(settings.standardShippingCost) : undefined,
+      freeShippingThreshold: settings ? Number(settings.freeShippingThreshold) : undefined,
+    })
     const total = subtotal + shippingCost
 
     const orderCount = await prisma.order.count()

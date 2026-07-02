@@ -67,10 +67,24 @@ export const SHIPPING_ZONES: ShippingZone[] = [
   },
 ]
 
-export const FREE_SHIPPING_THRESHOLD = 200 // S/ 200
+export const DEFAULT_SHIPPING_COST = 15
+export const FREE_SHIPPING_THRESHOLD = 200 // Fallback when store settings are unavailable.
 
-export function getShippingCost(district: string, subtotal: number): number {
-  if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+type ShippingOptions = {
+  standardShippingCost?: number
+  freeShippingThreshold?: number
+}
+
+export function getShippingCost(
+  district: string,
+  subtotal: number,
+  options: ShippingOptions = {}
+): number {
+  const freeShippingThreshold = options.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD
+  const hasConfiguredStandardShipping = options.standardShippingCost !== undefined
+  const standardShippingCost = options.standardShippingCost ?? DEFAULT_SHIPPING_COST
+
+  if (subtotal >= freeShippingThreshold) {
     return 0
   }
 
@@ -78,7 +92,7 @@ export function getShippingCost(district: string, subtotal: number): number {
     z.districts.length === 0 || z.districts.includes(district)
   )
 
-  return zone?.baseCost ?? 20
+  return hasConfiguredStandardShipping ? standardShippingCost : zone?.baseCost ?? standardShippingCost
 }
 
 export function findZoneByDistrict(district: string): ShippingZone | undefined {

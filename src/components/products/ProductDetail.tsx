@@ -1,12 +1,13 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ShoppingCart, Minus, Plus, Truck, Award, ShieldCheck, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Product } from "@/types"
 import { useCartStore } from "@/stores/cart-store"
+import { useSettingsStore } from "@/stores/settings-store"
 import { cn } from "@/lib/utils"
 import { ProductFavoriteButton } from "@/components/products/ProductFavoriteButton"
 
@@ -20,6 +21,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0] || "")
   const [selectedSize, setSelectedSize] = useState<string>(product.requiresSize ? "" : product.sizes[0] || "")
   const addItem = useCartStore((state) => state.addItem)
+  const freeShippingThreshold = useSettingsStore(
+    (state) => state.storeConfig.freeShippingThreshold
+  )
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings)
+
+  useEffect(() => {
+    void fetchSettings(true)
+  }, [fetchSettings])
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
@@ -257,7 +266,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <Truck className="h-5 w-5 text-muted-foreground" />
           <div>
             <p className="font-medium">Envío gratis</p>
-            <p className="text-xs text-muted-foreground">En pedidos +S/ 200</p>
+            <p className="text-xs text-muted-foreground">En pedidos +S/ {freeShippingThreshold}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">

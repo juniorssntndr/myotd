@@ -3,23 +3,31 @@
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { CartItem } from "@/types"
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping"
+import { DEFAULT_SHIPPING_COST, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping"
 import { displayVariantSize } from "@/lib/product-options"
 
 interface OrderSummaryProps {
   items: CartItem[]
   subtotal?: number
   shippingCost?: number
+  freeShippingThreshold?: number
+  standardShippingCost?: number
 }
 
-export function OrderSummary({ items, subtotal, shippingCost }: OrderSummaryProps) {
+export function OrderSummary({
+  items,
+  subtotal,
+  shippingCost,
+  freeShippingThreshold = FREE_SHIPPING_THRESHOLD,
+  standardShippingCost = DEFAULT_SHIPPING_COST,
+}: OrderSummaryProps) {
   const calculatedSubtotal = subtotal ?? items.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
     0
   )
 
-  const calculatedShipping = shippingCost ?? (calculatedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 15)
-  const qualifiesForFreeShipping = calculatedSubtotal >= FREE_SHIPPING_THRESHOLD || calculatedShipping === 0
+  const calculatedShipping = shippingCost ?? (calculatedSubtotal >= freeShippingThreshold ? 0 : standardShippingCost)
+  const qualifiesForFreeShipping = calculatedSubtotal >= freeShippingThreshold || calculatedShipping === 0
   const total = calculatedSubtotal + calculatedShipping
 
   return (
@@ -99,7 +107,7 @@ export function OrderSummary({ items, subtotal, shippingCost }: OrderSummaryProp
 
       {!qualifiesForFreeShipping && (
         <p className="mt-3 text-xs text-muted-foreground">
-          Agrega S/ {(FREE_SHIPPING_THRESHOLD - calculatedSubtotal).toFixed(2)} más para obtener envío gratis
+          Agrega S/ {(freeShippingThreshold - calculatedSubtotal).toFixed(2)} más para obtener envío gratis
         </p>
       )}
     </div>

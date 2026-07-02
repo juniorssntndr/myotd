@@ -13,6 +13,7 @@ import { PaymentForm } from "@/components/checkout/PaymentForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
 import { LegalLinks } from "@/components/legal/LegalLinks"
 import { useCartStore } from "@/stores/cart-store"
+import { useSettingsStore } from "@/stores/settings-store"
 import { getShippingCost } from "@/lib/shipping"
 import type { PaymentMethod, ShippingAddress } from "@/types"
 
@@ -88,6 +89,8 @@ export default function CheckoutPage() {
   const router = useRouter()
   const items = useCartStore((state) => state.items)
   const clearCart = useCartStore((state) => state.clearCart)
+  const storeConfig = useSettingsStore((state) => state.storeConfig)
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings)
 
   const [currentStep, setCurrentStep] = useState(1)
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>(INITIAL_ADDRESS)
@@ -104,6 +107,10 @@ export default function CheckoutPage() {
     }
   }, [router])
 
+  useEffect(() => {
+    void fetchSettings(true)
+  }, [fetchSettings])
+
   const subtotal = useMemo(
     () => items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
     [items]
@@ -111,8 +118,8 @@ export default function CheckoutPage() {
 
   const shippingCost = useMemo(() => {
     const district = shippingAddress.district || shippingAddress.city
-    return getShippingCost(district, subtotal)
-  }, [shippingAddress.city, shippingAddress.district, subtotal])
+    return getShippingCost(district, subtotal, storeConfig)
+  }, [shippingAddress.city, shippingAddress.district, storeConfig, subtotal])
 
   const cashOnDeliveryAvailable = shippingAddress.city.startsWith("Lima")
 
@@ -430,7 +437,13 @@ export default function CheckoutPage() {
 
         <div className="lg:col-span-1">
           <div className="sticky top-24">
-            <OrderSummary items={items} subtotal={subtotal} shippingCost={shippingCost} />
+            <OrderSummary
+              items={items}
+              subtotal={subtotal}
+              shippingCost={shippingCost}
+              freeShippingThreshold={storeConfig.freeShippingThreshold}
+              standardShippingCost={storeConfig.standardShippingCost}
+            />
           </div>
         </div>
       </div>
